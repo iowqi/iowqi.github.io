@@ -34,6 +34,13 @@ export type SiteConfig = {
 		enable: boolean;
 		depth: 1 | 2 | 3;
 	};
+	backgroundPattern?: {
+		enable: boolean;
+		density: number; // 0.4 ~ 2.5, controls polygon count
+		strokeAlpha: number; // 0.03 ~ 0.45
+		topSafeZoneRatio: number; // 0.15 ~ 0.75, relative to viewport height
+		seed?: string; // fixed seed; undefined means device/session based seed
+	};
 
 	favicon: Favicon[];
 };
