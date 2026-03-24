@@ -71,20 +71,60 @@ const darkImg = await resolveLocalImage(darkSrc);
 const imageClass = "w-full h-full object-cover";
 const imageStyle = `object-position: ${position}`;
 ---
-<div id={id} class:list={[className, 'overflow-hidden relative']}>
-    <div class="transition absolute inset-0 dark:bg-black/10 bg-opacity-50 pointer-events-none"></div>
-    {darkSrc ? (
-        <>
-            {isLocal && img && <Image src={img} alt={alt || ""} class={`${imageClass} block dark:hidden`} style={imageStyle}/>}
-            {!isLocal && <img src={isPublic ? url(src) : src} alt={alt || ""} class={`${imageClass} block dark:hidden`} style={imageStyle}/>}
 
-            {darkIsLocal && darkImg && <Image src={darkImg} alt={alt || ""} class={`${imageClass} hidden dark:block`} style={imageStyle}/>}
-            {!darkIsLocal && darkSrc && <img src={darkIsPublic ? url(darkSrc) : darkSrc} alt={alt || ""} class={`${imageClass} hidden dark:block`} style={imageStyle}/>}
-        </>
-    ) : (
-        <>
-            {isLocal && img && <Image src={img} alt={alt || ""} class={imageClass} style={imageStyle}/>}
-            {!isLocal && <img src={isPublic ? url(src) : src} alt={alt || ""} class={imageClass} style={imageStyle}/>}
-        </>
-    )}
+<div id={id} class:list={[className, "overflow-hidden relative"]}>
+	<div class="transition absolute inset-0 dark:bg-black/10 bg-opacity-50 pointer-events-none"></div>
+	{
+		darkSrc ? (
+			<>
+				{isLocal && img && (
+					<Image
+						src={img}
+						alt={alt || ""}
+						class={`${imageClass} block dark:hidden`}
+						style={imageStyle}
+					/>
+				)}
+				{!isLocal && (
+					<img
+						src={isPublic ? url(src) : src}
+						alt={alt || ""}
+						class={`${imageClass} block dark:hidden`}
+						style={imageStyle}
+					/>
+				)}
+
+				{darkIsLocal && darkImg && (
+					<Image
+						src={darkImg}
+						alt={alt || ""}
+						class={`${imageClass} hidden dark:block`}
+						style={imageStyle}
+					/>
+				)}
+				{!darkIsLocal && darkSrc && (
+					<img
+						src={darkIsPublic ? url(darkSrc) : darkSrc}
+						alt={alt || ""}
+						class={`${imageClass} hidden dark:block`}
+						style={imageStyle}
+					/>
+				)}
+			</>
+		) : (
+			<>
+				{isLocal && img && (
+					<Image src={img} alt={alt || ""} class={imageClass} style={imageStyle} />
+				)}
+				{!isLocal && (
+					<img
+						src={isPublic ? url(src) : src}
+						alt={alt || ""}
+						class={imageClass}
+						style={imageStyle}
+					/>
+				)}
+			</>
+		)
+	}
 </div>
