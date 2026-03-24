@@ -2,7 +2,25 @@
 
 @layer components {
     .card-base {
-        @apply rounded-[var(--radius-large)] overflow-hidden bg-[var(--card-bg)] transition;
+        @apply relative rounded-[var(--radius-large)] overflow-hidden transition;
+        background: color-mix(in oklab, var(--card-bg) 62%, transparent);
+        backdrop-filter: blur(16px) saturate(130%);
+        -webkit-backdrop-filter: blur(16px) saturate(130%);
+        box-shadow:
+            0 10px 30px rgba(15, 23, 42, 0.10),
+            0 2px 10px rgba(15, 23, 42, 0.06);
+        border: none;
+    }
+
+    .card-base::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background-image: radial-gradient(rgba(255, 255, 255, 0.085) 0.55px, transparent 0.55px);
+        background-size: 3px 3px;
+        opacity: 0.34;
+        mix-blend-mode: soft-light;
     }
     h1, h2, h3, h4, h5, h6, p, a, span, li, ul, ol, blockquote, code, pre, table, th, td, strong {
         @apply transition;
@@ -109,6 +127,103 @@
     }
     .btn-regular-dark.success {
         @apply bg-[oklch(0.75_0.14_var(--hue))] dark:bg-[oklch(0.75_0.14_var(--hue))]
+    }
+}
+
+@property --swup-neon-phase {
+    syntax: "<angle>";
+    inherits: false;
+    initial-value: 0deg;
+}
+
+@keyframes swup-btn-neon-phase {
+    to {
+        --swup-neon-phase: 360deg;
+    }
+}
+
+@keyframes swup-btn-neon-pulse-fallback {
+    0%,
+    100% {
+        box-shadow:
+            0 0 6px oklch(0.78 0.18 var(--hue) / 0.38),
+            0 0 14px oklch(0.72 0.15 var(--hue) / 0.22);
+    }
+    50% {
+        box-shadow:
+            0 0 11px oklch(0.82 0.2 var(--hue) / 0.72),
+            0 0 24px oklch(0.76 0.16 var(--hue) / 0.4);
+    }
+}
+
+#swup-container .btn-card:not(.disabled),
+#swup-container .btn-plain,
+#swup-container .btn-regular {
+    border: none !important;
+    outline: none;
+    box-shadow: 0 4px 9px rgba(15, 23, 42, 0.07);
+    backdrop-filter: blur(14px) saturate(145%);
+    -webkit-backdrop-filter: blur(14px) saturate(145%);
+}
+
+#swup-container .btn-card:not(.disabled) {
+    background: color-mix(in oklab, var(--card-bg) 52%, transparent) !important;
+}
+
+#swup-container .btn-regular {
+    background: color-mix(in oklab, var(--btn-regular-bg) 52%, transparent) !important;
+}
+
+#swup-container .btn-plain {
+    background: color-mix(in oklab, var(--card-bg) 42%, transparent) !important;
+}
+
+#swup-container .btn-card:not(.disabled):hover,
+#swup-container .btn-card:not(.disabled):active,
+#swup-container .btn-plain:hover,
+#swup-container .btn-plain:active,
+#swup-container .btn-regular:hover,
+#swup-container .btn-regular:active {
+    background: color-mix(in oklab, var(--card-bg) 58%, transparent) !important;
+}
+
+#swup-container .btn-regular:hover,
+#swup-container .btn-regular:active {
+    background: color-mix(in oklab, var(--btn-regular-bg) 58%, transparent) !important;
+}
+
+@supports (width: calc(sin(0deg) * 1px)) {
+    #swup-container .btn-card:not(.disabled):hover,
+    #swup-container .btn-plain:hover,
+    #swup-container .btn-regular:hover {
+        animation: swup-btn-neon-phase 2.8s linear infinite;
+        box-shadow:
+            0 0 calc(4px + 9px * (0.5 + 0.5 * sin(var(--swup-neon-phase))))
+                oklch(0.85 0.22 var(--hue) / calc(0.42 + 0.38 * (0.5 + 0.5 * sin(var(--swup-neon-phase))))),
+            0 0 calc(11px + 13px * (0.5 + 0.5 * sin(var(--swup-neon-phase))))
+                oklch(0.74 0.16 var(--hue) / calc(0.18 + 0.32 * (0.5 + 0.5 * sin(var(--swup-neon-phase)))));
+        text-shadow:
+            0 0 calc(2.5px + 5.5px * (0.5 + 0.5 * sin(var(--swup-neon-phase))))
+                oklch(0.88 0.2 var(--hue) / calc(0.38 + 0.42 * (0.5 + 0.5 * sin(var(--swup-neon-phase)))));
+    }
+}
+
+@supports not (width: calc(sin(0deg) * 1px)) {
+    #swup-container .btn-card:not(.disabled):hover,
+    #swup-container .btn-plain:hover,
+    #swup-container .btn-regular:hover {
+        animation: swup-btn-neon-pulse-fallback 2.8s ease-in-out infinite;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #swup-container .btn-card:not(.disabled):hover,
+    #swup-container .btn-plain:hover,
+    #swup-container .btn-regular:hover {
+        animation: none;
+        box-shadow:
+            0 0 8px oklch(0.78 0.18 var(--hue) / 0.5),
+            0 0 16px oklch(0.72 0.14 var(--hue) / 0.28);
     }
 }
 
