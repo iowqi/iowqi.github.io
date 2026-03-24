@@ -44,6 +44,16 @@ const bannerDarkSrc = bannerSrc.includes(".")
 const mainPanelTop = siteConfig.banner.enable
 	? `calc(${BANNER_HEIGHT}vh - ${MAIN_PANEL_OVERLAPS_BANNER_HEIGHT}rem)`
 	: "5.5rem";
+
+const bannerParallaxConfig = {
+	enable: siteConfig.banner.parallax?.enable ?? false,
+	maxOffset: siteConfig.banner.parallax?.maxOffset ?? 38,
+	scrollFactor: siteConfig.banner.parallax?.scrollFactor ?? 0.12,
+	spring: siteConfig.banner.parallax?.spring ?? 0.08,
+	damping: siteConfig.banner.parallax?.damping ?? 0.82,
+	targetDecay: siteConfig.banner.parallax?.targetDecay ?? 0.92,
+	gradientMultiplier: siteConfig.banner.parallax?.gradientMultiplier ?? 1.2,
+};
 ---
 
 <Layout title={title} banner={banner} description={description} lang={lang} setOGTypeArticle={setOGTypeArticle}>
@@ -58,28 +68,34 @@ const mainPanelTop = siteConfig.banner.enable
 
 <!-- Banner -->
 {siteConfig.banner.enable && <div id="banner-wrapper" class={`absolute z-10 w-full transition duration-700`} style={`top: -${BANNER_HEIGHT_EXTEND}vh`}>
-    <div class="h-full overflow-hidden">
-        <ImageWrapper
-            id="banner"
-            alt="Banner image of the blog"
-            class:list={["object-cover h-full transition duration-700 opacity-0 scale-105"]}
-            src={bannerSrc}
-            darkSrc={bannerDarkSrc}
-            position={siteConfig.banner.position}
-        />
+    <div id="banner-parallax-layer" class="relative h-full">
+        <div class="h-full overflow-hidden">
+            <ImageWrapper
+                id="banner"
+                alt="Banner image of the blog"
+                class:list={["object-cover h-full transition duration-700 opacity-0 scale-105"]}
+                src={bannerSrc}
+                darkSrc={bannerDarkSrc}
+                position={siteConfig.banner.position}
+                data-banner-parallax
+            />
+        </div>
+        <div
+            aria-hidden="true"
+            data-banner-gradient
+            class="pointer-events-none absolute inset-x-0 -bottom-px h-[2px] bg-[var(--page-bg)]"
+        ></div>
+        <div
+            aria-hidden="true"
+            data-banner-gradient
+            class="pointer-events-none absolute inset-x-0 bottom-0 h-32 md:h-40 bg-gradient-to-t from-[var(--page-bg)] via-[var(--page-bg)]/70 to-transparent"
+        ></div>
+        <div
+            aria-hidden="true"
+            data-banner-gradient
+            class="pointer-events-none absolute inset-x-0 top-full h-24 md:h-32 bg-gradient-to-b from-[var(--page-bg)] via-[var(--page-bg)]/70 to-transparent"
+        ></div>
     </div>
-    <div
-        aria-hidden="true"
-        class="pointer-events-none absolute inset-x-0 -bottom-px h-[2px] bg-[var(--page-bg)]"
-    ></div>
-    <div
-        aria-hidden="true"
-        class="pointer-events-none absolute inset-x-0 bottom-0 h-32 md:h-40 bg-gradient-to-t from-[var(--page-bg)] via-[var(--page-bg)]/70 to-transparent"
-    ></div>
-    <div
-        aria-hidden="true"
-        class="pointer-events-none absolute inset-x-0 top-full h-24 md:h-32 bg-gradient-to-b from-[var(--page-bg)] via-[var(--page-bg)]/70 to-transparent"
-    ></div>
 </div>}
 
 <!-- Main content -->
@@ -145,4 +161,107 @@ const mainPanelTop = siteConfig.banner.enable
         {!siteConfig.toc.enable && <div id="toc"></div>}
     </div>
 </div>
+
+<script is:inline define:vars={{ bannerParallaxConfig }}>
+    (() => {
+        let cleanup = null;
+
+        const init = () => {
+            if (cleanup) {
+                cleanup();
+                cleanup = null;
+            }
+
+            const banner = document.querySelector("#banner");
+            const parallaxLayer = document.querySelector("#banner-parallax-layer");
+            const gradientEls = Array.from(document.querySelectorAll("[data-banner-gradient]"));
+
+            if (!banner || !parallaxLayer || gradientEls.length === 0) return;
+
+            let current = 0;
+            let velocity = 0;
+            let target = 0;
+            let rafId = 0;
+            let running = false;
+            let lastScrollY = window.scrollY;
+
+            if (!bannerParallaxConfig?.enable) return;
+
+            const maxOffset = Number(bannerParallaxConfig.maxOffset) || 38;
+            const scrollFactor = Number(bannerParallaxConfig.scrollFactor) || 0.12;
+            const spring = Number(bannerParallaxConfig.spring) || 0.08;
+            const damping = Number(bannerParallaxConfig.damping) || 0.82;
+            const targetDecay = Number(bannerParallaxConfig.targetDecay) || 0.92;
+            const gradientMultiplier = Number(bannerParallaxConfig.gradientMultiplier) || 1.2;
+
+            const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+
+            const render = (y) => {
+                parallaxLayer.style.transform = `translate3d(0, ${y}px, 0)`;
+                banner.style.transform = "translate3d(0, 0, 0)";
+                const gradientExtraOffset = y * (gradientMultiplier - 1);
+                for (const el of gradientEls) {
+                    el.style.transform = `translate3d(0, ${gradientExtraOffset}px, 0)`;
+                }
+            };
+
+            const animate = () => {
+                target *= targetDecay;
+
+                const force = (target - current) * spring;
+                velocity = (velocity + force) * damping;
+                current += velocity;
+
+                render(current);
+
+                const stillMoving =
+                    Math.abs(velocity) > 0.02 ||
+                    Math.abs(current) > 0.02 ||
+                    Math.abs(target) > 0.02;
+
+                if (stillMoving) {
+                    rafId = requestAnimationFrame(animate);
+                    return;
+                }
+
+                current = 0;
+                velocity = 0;
+                target = 0;
+                render(0);
+                running = false;
+            };
+
+            const onScroll = () => {
+                const y = window.scrollY;
+                const delta = y - lastScrollY;
+                lastScrollY = y;
+
+                target = clamp(target + delta * scrollFactor, -maxOffset, maxOffset);
+
+                if (!running) {
+                    running = true;
+                    rafId = requestAnimationFrame(animate);
+                }
+            };
+
+            window.addEventListener("scroll", onScroll, { passive: true });
+            document.documentElement.setAttribute("data-banner-parallax-active", "true");
+
+            cleanup = () => {
+                window.removeEventListener("scroll", onScroll);
+                cancelAnimationFrame(rafId);
+                document.documentElement.removeAttribute("data-banner-parallax-active");
+            };
+        };
+
+        init();
+        document.addEventListener("astro:page-load", init);
+        document.addEventListener("astro:before-swap", () => {
+            if (cleanup) {
+                cleanup();
+                cleanup = null;
+            }
+        });
+    })();
+</script>
 </Layout>

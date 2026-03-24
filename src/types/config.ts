@@ -24,6 +24,15 @@ export type SiteConfig = {
 		enable: boolean;
 		src: string;
 		position?: "top" | "center" | "bottom";
+		parallax?: {
+			enable: boolean;
+			maxOffset: number;
+			scrollFactor: number;
+			spring: number;
+			damping: number;
+			targetDecay: number;
+			gradientMultiplier: number;
+		};
 		credit: {
 			enable: boolean;
 			text: string;

@@ -19,6 +19,15 @@ export const siteConfig: SiteConfig = {
 		enable: true,
 		src: "assets/images/banner.jpg", // Relative to the /src directory. Relative to the /public directory if it starts with '/'
 		position: "center", // Equivalent to object-position, only supports 'top', 'center', 'bottom'. 'center' by default
+		parallax: {
+			enable: true, // Enable delayed spring motion while scrolling
+			maxOffset: 240, // Maximum translate distance in px
+			scrollFactor: 0.06, // Scroll delta -> target offset ratio
+			spring: 0.0065, // Spring force; smaller = slower return
+			damping: 0.94, // Velocity damping; closer to 1 = more floaty
+			targetDecay: 0.985, // Target decays to 0 when scrolling stops
+			gradientMultiplier: 1.1, // Gradient layer movement ratio vs banner
+		},
 		credit: {
 			enable: false, // Display the credit text of the banner image
 			text: "", // Credit text to be displayed
