@@ -19,6 +19,22 @@ export const siteConfig: SiteConfig = {
 		enable: true,
 		src: "assets/images/banner.jpg", // Relative to the /src directory. Relative to the /public directory if it starts with '/'
 		position: "center", // Equivalent to object-position, only supports 'top', 'center', 'bottom'. 'center' by default
+		welcomeText: {
+			enable: true, // Display welcome text on top of banner
+			content: "Welcome to my blog", // Text content displayed in the banner typing effect
+			typingSpeed: 120, // Milliseconds per character
+			fontFamily: "\"Space Grotesk\", \"Segoe UI\", \"Inter\", system-ui, -apple-system, sans-serif", // CSS font-family for banner welcome text
+			fontWeight: 800, // 600~900 recommended
+			fontSizeMobileRem: 3, // Mobile font size (rem)
+			fontSizeDesktopRem: 4.5, // Desktop font size (rem)
+			letterSpacingEm: 0.16, // Letter spacing (em)
+			lineHeight: 1.3, // Increase to avoid bottom clipping
+			containerPaddingYRem: 0.55, // Vertical padding for the text container (rem)
+			gradientDurationMs: 5200, // Gradient flow animation duration
+			waveDurationMs: 5200, // Character wave animation duration
+			waveAmplitudePx: 26.8, // Wave vertical amplitude in px
+			waveRotateDeg: 5.2, // Max character rotation degree in wave
+		},
 		parallax: {
 			enable: true, // Enable delayed spring motion while scrolling
 			maxOffset: 240, // Maximum translate distance in px

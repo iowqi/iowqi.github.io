@@ -24,6 +24,22 @@ export type SiteConfig = {
 		enable: boolean;
 		src: string;
 		position?: "top" | "center" | "bottom";
+		welcomeText?: {
+			enable: boolean;
+			content: string;
+			typingSpeed?: number;
+			fontFamily?: string;
+			fontWeight?: number;
+			fontSizeMobileRem?: number;
+			fontSizeDesktopRem?: number;
+			letterSpacingEm?: number;
+			lineHeight?: number;
+			containerPaddingYRem?: number;
+			gradientDurationMs?: number;
+			waveDurationMs?: number;
+			waveAmplitudePx?: number;
+			waveRotateDeg?: number;
+		};
 		parallax?: {
 			enable: boolean;
 			maxOffset: number;

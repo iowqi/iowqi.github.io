@@ -54,6 +54,25 @@ const bannerParallaxConfig = {
 	targetDecay: siteConfig.banner.parallax?.targetDecay ?? 0.92,
 	gradientMultiplier: siteConfig.banner.parallax?.gradientMultiplier ?? 1.2,
 };
+
+const bannerWelcomeConfig = {
+	enable: siteConfig.banner.welcomeText?.enable ?? true,
+	content: siteConfig.banner.welcomeText?.content ?? "Welcome",
+	typingSpeed: siteConfig.banner.welcomeText?.typingSpeed ?? 120,
+	fontFamily:
+		siteConfig.banner.welcomeText?.fontFamily ??
+		'"Space Grotesk", "Segoe UI", "Inter", system-ui, -apple-system, sans-serif',
+	fontWeight: siteConfig.banner.welcomeText?.fontWeight ?? 800,
+	fontSizeMobileRem: siteConfig.banner.welcomeText?.fontSizeMobileRem ?? 3,
+	fontSizeDesktopRem: siteConfig.banner.welcomeText?.fontSizeDesktopRem ?? 4.5,
+	letterSpacingEm: siteConfig.banner.welcomeText?.letterSpacingEm ?? 0.16,
+	lineHeight: siteConfig.banner.welcomeText?.lineHeight ?? 1.3,
+	containerPaddingYRem: siteConfig.banner.welcomeText?.containerPaddingYRem ?? 0.55,
+	gradientDurationMs: siteConfig.banner.welcomeText?.gradientDurationMs ?? 5200,
+	waveDurationMs: siteConfig.banner.welcomeText?.waveDurationMs ?? 2600,
+	waveAmplitudePx: siteConfig.banner.welcomeText?.waveAmplitudePx ?? 16.8,
+	waveRotateDeg: siteConfig.banner.welcomeText?.waveRotateDeg ?? 5.2,
+};
 ---
 
 <Layout title={title} banner={banner} description={description} lang={lang} setOGTypeArticle={setOGTypeArticle}>
@@ -95,6 +114,20 @@ const bannerParallaxConfig = {
             data-banner-gradient
             class="pointer-events-none absolute inset-x-0 top-full h-24 md:h-32 bg-gradient-to-b from-[var(--page-bg)] via-[var(--page-bg)]/70 to-transparent"
         ></div>
+        {bannerWelcomeConfig.enable && <div
+            class="pointer-events-none absolute inset-0 z-20 flex items-center justify-center overflow-visible px-4"
+            style={`padding-top:${bannerWelcomeConfig.containerPaddingYRem}rem;padding-bottom:${bannerWelcomeConfig.containerPaddingYRem}rem;`}
+        >
+            <h1
+                id="banner-welcome-text"
+                class="opacity-0 banner-welcome-modern"
+                style={`--banner-welcome-font-family:${bannerWelcomeConfig.fontFamily};--banner-welcome-font-weight:${bannerWelcomeConfig.fontWeight};--banner-welcome-size-mobile:${bannerWelcomeConfig.fontSizeMobileRem}rem;--banner-welcome-size-desktop:${bannerWelcomeConfig.fontSizeDesktopRem}rem;--banner-welcome-letter-spacing:${bannerWelcomeConfig.letterSpacingEm}em;--banner-welcome-line-height:${bannerWelcomeConfig.lineHeight};--banner-welcome-gradient-duration:${bannerWelcomeConfig.gradientDurationMs}ms;--banner-welcome-wave-duration:${bannerWelcomeConfig.waveDurationMs}ms;--banner-welcome-wave-amplitude:${bannerWelcomeConfig.waveAmplitudePx}px;--banner-welcome-wave-rotate:${bannerWelcomeConfig.waveRotateDeg}deg;`}
+                data-full-text={bannerWelcomeConfig.content}
+                data-typing-speed={bannerWelcomeConfig.typingSpeed}
+                data-wave-duration-ms={bannerWelcomeConfig.waveDurationMs}
+                aria-label={bannerWelcomeConfig.content}
+            ></h1>
+        </div>}
     </div>
 </div>}
 
@@ -262,6 +295,122 @@ const bannerParallaxConfig = {
                 cleanup = null;
             }
         });
+    })();
+</script>
+
+<script is:inline>
+    (() => {
+        let typingTimer = null;
+        let cursorTimer = null;
+        const TYPED_FLAG_KEY = "bannerWelcomeTyped";
+
+        const escapeHtml = (value) =>
+            value
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+
+        const renderWaveText = (el, typed, withCursor) => {
+            const waveDurationAttr = Number(el.getAttribute("data-wave-duration-ms"));
+            const waveDurationMs = Number.isFinite(waveDurationAttr) && waveDurationAttr > 0 ? waveDurationAttr : 2600;
+            const nowMs = Date.now();
+
+            const chars = [...typed]
+                .map((char, i) => {
+                    const safeChar = char === " " ? "&nbsp;" : escapeHtml(char);
+                    const delayMs = -((nowMs + i * 90) % waveDurationMs);
+                    return `<span class="banner-welcome-wave-char" style="--wave-index:${i};animation-delay:${delayMs}ms">${safeChar}</span>`;
+                })
+                .join("");
+
+            const cursor = withCursor ? `<span class="banner-welcome-caret">_</span>` : "";
+            el.innerHTML = chars + cursor;
+        };
+
+        const isAlreadyTyped = () => {
+            try {
+                return window.sessionStorage.getItem(TYPED_FLAG_KEY) === "1";
+            } catch {
+                return window.__bannerWelcomeTyped === true;
+            }
+        };
+
+        const setTypedFlag = () => {
+            try {
+                window.sessionStorage.setItem(TYPED_FLAG_KEY, "1");
+            } catch {
+                window.__bannerWelcomeTyped = true;
+            }
+        };
+
+        const showFinalText = (textEl, fullText) => {
+            textEl.classList.remove("opacity-0");
+            renderWaveText(textEl, fullText, false);
+        };
+
+        const typeBannerWelcome = () => {
+            const textEl = document.getElementById("banner-welcome-text");
+            if (!textEl) return;
+
+            if (typingTimer) {
+                window.clearInterval(typingTimer);
+                typingTimer = null;
+            }
+            if (cursorTimer) {
+                window.clearInterval(cursorTimer);
+                cursorTimer = null;
+            }
+
+            const fullText = textEl.getAttribute("data-full-text") || "Welcome";
+            const typingSpeedAttr = Number(textEl.getAttribute("data-typing-speed"));
+            const typingSpeed = Number.isFinite(typingSpeedAttr) && typingSpeedAttr > 0 ? typingSpeedAttr : 120;
+
+            if (isAlreadyTyped()) {
+                showFinalText(textEl, fullText);
+                return;
+            }
+
+            textEl.classList.remove("opacity-0");
+
+            let index = 0;
+            let cursorVisible = true;
+
+            const render = () => {
+                const typed = fullText.slice(0, index);
+                renderWaveText(textEl, typed, cursorVisible && index < fullText.length);
+            };
+
+            render();
+
+            cursorTimer = window.setInterval(() => {
+                cursorVisible = !cursorVisible;
+                render();
+            }, 420);
+
+            typingTimer = window.setInterval(() => {
+                index += 1;
+                render();
+
+                if (index >= fullText.length) {
+                    window.clearInterval(typingTimer);
+                    typingTimer = null;
+                    if (cursorTimer) {
+                        window.clearInterval(cursorTimer);
+                        cursorTimer = null;
+                    }
+                    showFinalText(textEl, fullText);
+                    setTypedFlag();
+                }
+            }, typingSpeed);
+        };
+
+        window.addEventListener("load", () => {
+            window.setTimeout(typeBannerWelcome, 120);
+        });
+
+        document.addEventListener("astro:page-load", typeBannerWelcome);
     })();
 </script>
 </Layout>
