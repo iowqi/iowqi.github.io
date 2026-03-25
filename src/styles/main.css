@@ -3,13 +3,33 @@
 @layer components {
     .card-base {
         @apply relative rounded-[var(--radius-large)] overflow-hidden transition;
-        background: color-mix(in oklab, var(--card-bg) 62%, transparent);
+        --tilt-rotate-x: 0deg;
+        --tilt-rotate-y: 0deg;
+        --tilt-pointer-x: 50%;
+        --tilt-pointer-y: 50%;
+        --tilt-lift: 0px;
+        --tilt-scale: 1;
+        --tilt-glow-opacity: 0;
+        --tilt-lift-active: 14px;
+        --tilt-scale-active: 1.012;
+        --tilt-glow-active: 1;
+        --tilt-glow-blend: normal;
+        --tilt-glow-color-strong: color-mix(in oklab, var(--primary) 34%, transparent);
+        --tilt-glow-color-soft: color-mix(in oklab, var(--primary) 18%, transparent);
+        background: color-mix(in oklab, var(--card-bg) 38%, transparent);
         backdrop-filter: blur(16px) saturate(130%);
         -webkit-backdrop-filter: blur(16px) saturate(130%);
         box-shadow:
             0 10px 30px rgba(15, 23, 42, 0.10),
             0 2px 10px rgba(15, 23, 42, 0.06);
         border: none;
+        transform-style: preserve-3d;
+        transform: perspective(1200px) translate3d(0, 0, var(--tilt-lift)) rotateX(var(--tilt-rotate-x)) rotateY(var(--tilt-rotate-y)) scale(var(--tilt-scale));
+        transition:
+            transform 520ms cubic-bezier(0.2, 0.72, 0.2, 1),
+            box-shadow 520ms cubic-bezier(0.2, 0.72, 0.2, 1),
+            filter 520ms cubic-bezier(0.2, 0.72, 0.2, 1);
+        will-change: transform, box-shadow, filter;
     }
 
     .card-base::before {
@@ -22,6 +42,75 @@
         opacity: 0.34;
         mix-blend-mode: soft-light;
     }
+
+    .card-base::after {
+        content: "";
+        position: absolute;
+        inset: -40%;
+        pointer-events: none;
+        border-radius: inherit;
+        background:
+            radial-gradient(
+                circle at var(--tilt-pointer-x) var(--tilt-pointer-y),
+                var(--tilt-glow-color-strong) 0%,
+                var(--tilt-glow-color-soft) 24%,
+                transparent 60%
+            );
+        transform: translateZ(24px);
+        opacity: var(--tilt-glow-opacity);
+        transition: opacity 340ms ease;
+        mix-blend-mode: var(--tilt-glow-blend);
+    }
+
+    .card-base.is-tilting {
+        --tilt-lift: var(--tilt-lift-active, 14px);
+        --tilt-scale: var(--tilt-scale-active, 1.012);
+        --tilt-glow-opacity: var(--tilt-glow-active, 1);
+        box-shadow:
+            0 26px 46px rgba(15, 23, 42, 0.19),
+            0 10px 26px rgba(15, 23, 42, 0.12),
+            0 0 0 1px color-mix(in oklab, var(--primary) 24%, transparent);
+        filter: saturate(1.05) brightness(1.02);
+    }
+
+    .card-base.is-tilting-large {
+        box-shadow:
+            0 18px 34px rgba(15, 23, 42, 0.15),
+            0 8px 20px rgba(15, 23, 42, 0.10),
+            0 0 0 1px color-mix(in oklab, var(--primary) 18%, transparent);
+        filter: saturate(1.03) brightness(1.01);
+    }
+
+    .card-base.card-base-nav {
+        background: color-mix(in oklab, var(--card-bg) 40%, transparent);
+        backdrop-filter: blur(22px) saturate(138%);
+        -webkit-backdrop-filter: blur(22px) saturate(138%);
+    }
+
+    .card-base.card-base-nav::after {
+        inset: 0;
+        transform: translateZ(12px);
+        background:
+            radial-gradient(
+                circle at var(--tilt-pointer-x) var(--tilt-pointer-y),
+                color-mix(in oklab, var(--primary) 26%, transparent) 0%,
+                color-mix(in oklab, var(--primary) 14%, transparent) 34%,
+                transparent 62%
+            );
+    }
+
+    .card-base.card-base-nav.is-tilting {
+        --tilt-lift-active: 8px;
+        --tilt-scale-active: 1.004;
+        --tilt-glow-active: 0.82;
+    }
+
+    .dark .card-base {
+        --tilt-glow-blend: soft-light;
+        --tilt-glow-color-strong: color-mix(in oklab, var(--primary) 44%, transparent);
+        --tilt-glow-color-soft: color-mix(in oklab, var(--primary) 24%, transparent);
+    }
+
     h1, h2, h3, h4, h5, h6, p, a, span, li, ul, ol, blockquote, code, pre, table, th, td, strong {
         @apply transition;
     }
@@ -39,7 +128,10 @@
         @apply transition rounded-md p-1.5 -m-1.5 expand-animation;
     }
     .float-panel {
-        @apply top-[5.25rem] rounded-[var(--radius-large)] overflow-hidden bg-[var(--float-panel-bg)] transition shadow-xl dark:shadow-none
+        @apply top-[5.25rem] rounded-[var(--radius-large)] overflow-hidden transition shadow-xl dark:shadow-none;
+        background: color-mix(in oklab, var(--float-panel-bg) 88%, var(--card-bg));
+        backdrop-filter: blur(22px) saturate(145%);
+        -webkit-backdrop-filter: blur(22px) saturate(145%);
     }
     .float-panel-closed {
         @apply -translate-y-1 opacity-0 pointer-events-none

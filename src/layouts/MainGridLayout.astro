@@ -413,4 +413,130 @@ const bannerWelcomeConfig = {
         document.addEventListener("astro:page-load", typeBannerWelcome);
     })();
 </script>
+
+<script is:inline>
+    (() => {
+        let cleanups = [];
+
+        const initCardTilt = () => {
+            cleanups.forEach((fn) => fn());
+            cleanups = [];
+
+            const cards = Array.from(document.querySelectorAll(".card-base"));
+            if (cards.length === 0) return;
+
+            const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
+            const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            if (coarsePointer || reduceMotion) return;
+
+            const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+
+            for (const card of cards) {
+                let rafId = 0;
+                let currentX = 0;
+                let currentY = 0;
+                let targetX = 0;
+                let targetY = 0;
+                let pointerXPercent = 50;
+                let pointerYPercent = 50;
+
+                const rect = card.getBoundingClientRect();
+                const area = rect.width * rect.height;
+                const isLargePanel = rect.width >= 1000 || rect.height >= 1000 || area >= 300000;
+
+                const maxRotate = isLargePanel ? 2.5 : 12;
+                const enterBoost = isLargePanel ? 0.88 : 1.2;
+                const smoothing = isLargePanel ? 0.11 : 0.14;
+
+                card.style.setProperty("--tilt-lift-active", isLargePanel ? "4px" : "14px");
+                card.style.setProperty("--tilt-scale-active", isLargePanel ? "1.001" : "1.016");
+                card.style.setProperty("--tilt-glow-active", isLargePanel ? "0.1" : "0.5");
+
+                const render = () => {
+                    currentX += (targetX - currentX) * smoothing;
+                    currentY += (targetY - currentY) * smoothing;
+
+                    card.style.setProperty("--tilt-rotate-x", `${currentX.toFixed(2)}deg`);
+                    card.style.setProperty("--tilt-rotate-y", `${currentY.toFixed(2)}deg`);
+                    card.style.setProperty("--tilt-pointer-x", `${pointerXPercent.toFixed(2)}%`);
+                    card.style.setProperty("--tilt-pointer-y", `${pointerYPercent.toFixed(2)}%`);
+
+                    if (Math.abs(targetX - currentX) > 0.03 || Math.abs(targetY - currentY) > 0.03) {
+                        rafId = window.requestAnimationFrame(render);
+                    } else {
+                        rafId = 0;
+                    }
+                };
+
+                const run = () => {
+                    if (!rafId) {
+                        rafId = window.requestAnimationFrame(render);
+                    }
+                };
+
+                const onPointerMove = (event) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = clamp((event.clientX - rect.left) / rect.width, 0, 1);
+                    const y = clamp((event.clientY - rect.top) / rect.height, 0, 1);
+
+                    pointerXPercent = x * 100;
+                    pointerYPercent = y * 100;
+
+                    targetX = (0.5 - y) * maxRotate * enterBoost;
+                    targetY = (x - 0.5) * maxRotate * enterBoost;
+
+                    run();
+                };
+
+                const onPointerEnter = (event) => {
+                    card.classList.add("is-tilting");
+                    card.classList.toggle("is-tilting-large", isLargePanel);
+                    onPointerMove(event);
+                };
+
+                const reset = () => {
+                    targetX = 0;
+                    targetY = 0;
+                    pointerXPercent = 50;
+                    pointerYPercent = 50;
+                    card.classList.remove("is-tilting");
+                    card.classList.remove("is-tilting-large");
+                    run();
+                };
+
+                card.addEventListener("pointerenter", onPointerEnter);
+                card.addEventListener("pointermove", onPointerMove);
+                card.addEventListener("pointerleave", reset);
+                card.addEventListener("pointercancel", reset);
+
+                cleanups.push(() => {
+                    card.removeEventListener("pointerenter", onPointerEnter);
+                    card.removeEventListener("pointermove", onPointerMove);
+                    card.removeEventListener("pointerleave", reset);
+                    card.removeEventListener("pointercancel", reset);
+                    if (rafId) {
+                        window.cancelAnimationFrame(rafId);
+                        rafId = 0;
+                    }
+                    card.classList.remove("is-tilting");
+                    card.classList.remove("is-tilting-large");
+                    card.style.removeProperty("--tilt-rotate-x");
+                    card.style.removeProperty("--tilt-rotate-y");
+                    card.style.removeProperty("--tilt-pointer-x");
+                    card.style.removeProperty("--tilt-pointer-y");
+                    card.style.removeProperty("--tilt-lift-active");
+                    card.style.removeProperty("--tilt-scale-active");
+                    card.style.removeProperty("--tilt-glow-active");
+                });
+            }
+        };
+
+        initCardTilt();
+        document.addEventListener("astro:page-load", initCardTilt);
+        document.addEventListener("astro:before-swap", () => {
+            cleanups.forEach((fn) => fn());
+            cleanups = [];
+        });
+    })();
+</script>
 </Layout>
