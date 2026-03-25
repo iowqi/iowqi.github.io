@@ -63,30 +63,64 @@ let links: NavBarLink[] = navBarConfig.links.map(
 </div>
 
 <script>
-function switchTheme() {
-    if (localStorage.theme === 'dark') {
-        document.documentElement.classList.remove('dark');
-        localStorage.theme = 'light';
-    } else {
-        document.documentElement.classList.add('dark');
-        localStorage.theme = 'dark';
+function showDisplayPanel() {
+    const settingPanel = document.getElementById("display-setting");
+    const lightDarkPanel = document.getElementById("light-dark-panel");
+
+    if (lightDarkPanel) {
+        lightDarkPanel.classList.add("float-panel-closed");
+    }
+    if (settingPanel) {
+        settingPanel.classList.remove("float-panel-closed");
+    }
+}
+
+function hideDisplayPanel() {
+    const settingPanel = document.getElementById("display-setting");
+    if (settingPanel) {
+        settingPanel.classList.add("float-panel-closed");
     }
 }
 
 function loadButtonScript() {
-    let switchBtn = document.getElementById("scheme-switch");
-    if (switchBtn) {
-        switchBtn.onclick = function () {
-            switchTheme()
+    const settingBtn = document.getElementById("display-settings-switch");
+    const settingPanel = document.getElementById("display-setting");
+
+    if (settingBtn) {
+        settingBtn.onclick = function () {
+            const panel = document.getElementById("display-setting");
+            const isClosed = panel?.classList.contains("float-panel-closed");
+            const lightDarkPanel = document.getElementById("light-dark-panel");
+
+            if (lightDarkPanel) {
+                lightDarkPanel.classList.add("float-panel-closed");
+            }
+
+            if (panel) {
+                panel.classList.toggle("float-panel-closed", !isClosed);
+            }
+        };
+
+        settingBtn.onmouseenter = function () {
+            showDisplayPanel();
         };
     }
 
-    let settingBtn = document.getElementById("display-settings-switch");
+    if (settingPanel) {
+        settingPanel.onmouseenter = function () {
+            showDisplayPanel();
+        };
+
+        settingPanel.onmouseleave = function () {
+            hideDisplayPanel();
+        };
+    }
+
     if (settingBtn) {
-        settingBtn.onclick = function () {
-            let settingPanel = document.getElementById("display-setting");
-            if (settingPanel) {
-                settingPanel.classList.toggle("float-panel-closed");
+        settingBtn.onmouseleave = function () {
+            const panel = document.getElementById("display-setting");
+            if (!panel?.matches(":hover")) {
+                hideDisplayPanel();
             }
         };
     }
