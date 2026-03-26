@@ -9,12 +9,12 @@ html.is-animating .transition-swup-fade {
 /* Fade-in animations for components */
 @keyframes fade-in-up {
     0% {
-        transform: translateY(2rem);
         opacity: 0;
+        filter: blur(1.5px);
     }
     100% {
-        transform: translateY(0);
         opacity: 1;
+        filter: blur(0);
     }
 }
 

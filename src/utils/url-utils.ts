@@ -1,5 +1,5 @@
 import I18nKey from "@i18n/i18nKey";
-import { i18n } from "@i18n/translation";
+import { extractLangFromPath, getCurrentLang, i18n } from "@i18n/translation";
 
 export function pathsEqual(path1: string, path2: string) {
 	const normalizedPath1 = path1.replace(/^\/|\/$/g, "").toLowerCase();
@@ -39,6 +39,46 @@ export function getDir(path: string): string {
 	return path.substring(0, lastSlashIndex + 1);
 }
 
+function withLangPrefix(path: string): string {
+	const lang = getCurrentLang();
+	const normalized = path.startsWith("/") ? path : `/${path}`;
+	if (extractLangFromPath(normalized)) {
+		return normalized;
+	}
+	if (normalized === "/") {
+		return `/${lang}/`;
+	}
+	return `/${lang}${normalized}`;
+}
+
+export function stripLangPrefix(path: string): string {
+	const normalized = path.startsWith("/") ? path : `/${path}`;
+	const match = normalized.match(/^([^?#]*)(\?[^#]*)?(#.*)?$/);
+	const pathname = match?.[1] || "/";
+	const search = match?.[2] || "";
+	const hash = match?.[3] || "";
+
+	const segments = pathname.split("/").filter(Boolean);
+	if (segments.length === 0) {
+		return `/${search}${hash}`;
+	}
+	const first = decodeURIComponent(segments[0]);
+	if (extractLangFromPath(`/${first}/`)) {
+		const rest = segments.slice(1).join("/");
+		const base = rest ? `/${rest}/` : "/";
+		return `${base}${search}${hash}`;
+	}
+	return `${pathname}${search}${hash}`;
+}
+
+export function localizePath(path: string, lang = getCurrentLang()): string {
+	const basePath = stripLangPrefix(path);
+	if (basePath === "/") {
+		return `/${lang}/`;
+	}
+	return `/${lang}${basePath.startsWith("/") ? basePath : `/${basePath}`}`;
+}
+
 export function url(path: string) {
-	return joinUrl("", import.meta.env.BASE_URL, path);
+	return joinUrl("", import.meta.env.BASE_URL, withLangPrefix(path));
 }

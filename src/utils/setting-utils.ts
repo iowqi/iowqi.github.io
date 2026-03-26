@@ -4,8 +4,8 @@ import {
 	DEFAULT_THEME,
 	LIGHT_MODE,
 } from "@constants/constants.ts";
-import { expressiveCodeConfig } from "@/config";
-import type { LIGHT_DARK_MODE } from "@/types/config";
+import { expressiveCodeConfig, siteConfig } from "@/config";
+import type { LIGHT_DARK_MODE, SiteConfig } from "@/types/config";
 
 export function getDefaultHue(): number {
 	const fallback = "250";
@@ -58,4 +58,17 @@ export function setTheme(theme: LIGHT_DARK_MODE): void {
 
 export function getStoredTheme(): LIGHT_DARK_MODE {
 	return (localStorage.getItem("theme") as LIGHT_DARK_MODE) || DEFAULT_THEME;
+}
+
+export function getDefaultLang(): SiteConfig["lang"] {
+	const configCarrier = document.getElementById("config-carrier");
+	return (configCarrier?.dataset.lang as SiteConfig["lang"]) || siteConfig.lang;
+}
+
+export function getLang(): SiteConfig["lang"] {
+	return (localStorage.getItem("lang") as SiteConfig["lang"]) || getDefaultLang();
+}
+
+export function setLang(lang: SiteConfig["lang"]): void {
+	localStorage.setItem("lang", lang);
 }

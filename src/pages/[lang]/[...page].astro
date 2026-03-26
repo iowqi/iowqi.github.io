@@ -2,15 +2,19 @@
 import type { GetStaticPaths } from "astro";
 import PaginatedPostsPageContent from "@components/pages/PaginatedPostsPageContent.astro";
 import { PAGE_SIZE } from "@constants/constants";
+import { supportedLanguages } from "@i18n/translation";
 import { getSortedPosts } from "@utils/content-utils";
+import { setupI18nLangFromAstro } from "@utils/i18n-route-utils";
 
 export const getStaticPaths = (async ({ paginate }) => {
 	const allBlogPosts = await getSortedPosts();
-	return paginate(allBlogPosts, { pageSize: PAGE_SIZE });
+	return supportedLanguages.flatMap((lang) =>
+		paginate(allBlogPosts, { pageSize: PAGE_SIZE, params: { lang } }),
+	);
 }) satisfies GetStaticPaths;
-// https://github.com/withastro/astro/issues/6507#issuecomment-1489916992
 
 const { page } = Astro.props;
+const lang = setupI18nLangFromAstro(Astro);
 ---
 
-<PaginatedPostsPageContent page={page} />
+<PaginatedPostsPageContent page={page} lang={lang} />

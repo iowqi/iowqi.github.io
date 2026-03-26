@@ -1,0 +1,18 @@
+---
+import ArchivePanel from "@components/ArchivePanel.svelte";
+import I18nKey from "@i18n/i18nKey";
+import { i18n } from "@i18n/translation";
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+import { getSortedPostsList } from "@utils/content-utils";
+
+interface Props {
+	lang?: string;
+}
+
+const { lang } = Astro.props;
+const sortedPostsList = await getSortedPostsList();
+---
+
+<MainGridLayout lang={lang} title={i18n(I18nKey.archive)}>
+	<ArchivePanel sortedPosts={sortedPostsList} client:only="svelte" />
+</MainGridLayout>

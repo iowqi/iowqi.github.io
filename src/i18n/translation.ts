@@ -1,4 +1,5 @@
 import { siteConfig } from "../config";
+import type { SiteConfig } from "@/types/config";
 import type I18nKey from "./i18nKey";
 import { en } from "./languages/en";
 import { es } from "./languages/es";
@@ -15,7 +16,21 @@ export type Translation = {
 	[K in I18nKey]: string;
 };
 
+export const supportedLanguages: SiteConfig["lang"][] = [
+	"en",
+	"zh_CN",
+	"zh_TW",
+	"ja",
+	"ko",
+	"es",
+	"th",
+	"vi",
+	"tr",
+	"id",
+];
+
 const defaultTranslation = en;
+let currentLangOverride: SiteConfig["lang"] | null = null;
 
 const map: { [key: string]: Translation } = {
 	es: es,
@@ -38,11 +53,60 @@ const map: { [key: string]: Translation } = {
 	tr_tr: tr,
 };
 
+export function normalizeLang(input?: string | null): SiteConfig["lang"] {
+	if (!input || typeof input !== "string") {
+		return siteConfig.lang;
+	}
+	const lower = input.toLowerCase();
+	const found = supportedLanguages.find((lang) => lang.toLowerCase() === lower);
+	return found || siteConfig.lang;
+}
+
+export function extractLangFromPath(pathname: string): SiteConfig["lang"] | null {
+	const firstSegment = pathname.replace(/^\/+/, "").split("/")[0];
+	if (!firstSegment) {
+		return null;
+	}
+
+	const decoded = decodeURIComponent(firstSegment);
+	const found = supportedLanguages.find(
+		(lang) => lang.toLowerCase() === decoded.toLowerCase(),
+	);
+	return found || null;
+}
+
 export function getTranslation(lang: string): Translation {
 	return map[lang.toLowerCase()] || defaultTranslation;
 }
 
+export function setI18nLang(lang: SiteConfig["lang"]) {
+	currentLangOverride = normalizeLang(lang);
+}
+
+export function clearI18nLang() {
+	currentLangOverride = null;
+}
+
+export function getCurrentLang(): SiteConfig["lang"] {
+	if (currentLangOverride) {
+		return currentLangOverride;
+	}
+
+	if (typeof window !== "undefined") {
+		const fromPath = extractLangFromPath(window.location.pathname);
+		if (fromPath) {
+			return fromPath;
+		}
+		const storedLang = localStorage.getItem("lang");
+		if (storedLang) {
+			return normalizeLang(storedLang);
+		}
+	}
+
+	return siteConfig.lang;
+}
+
 export function i18n(key: I18nKey): string {
-	const lang = siteConfig.lang || "en";
+	const lang = getCurrentLang();
 	return getTranslation(lang)[key];
 }

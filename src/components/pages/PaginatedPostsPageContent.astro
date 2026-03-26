@@ -1,0 +1,21 @@
+---
+import type { Page } from "astro";
+import type { CollectionEntry } from "astro:content";
+
+import Pagination from "@components/control/Pagination.astro";
+import PostPage from "@components/PostPage.astro";
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+
+interface Props {
+	page: Page<CollectionEntry<"posts">>;
+	lang?: string;
+}
+
+const { page, lang } = Astro.props as Props;
+const len = page.data.length;
+---
+
+<MainGridLayout lang={lang}>
+	<PostPage page={page} />
+	<Pagination class="mx-auto onload-animation" page={page} style={`animation-delay: calc(var(--content-delay) + ${len * 50}ms)`} />
+</MainGridLayout>

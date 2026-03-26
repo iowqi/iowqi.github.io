@@ -5,6 +5,7 @@ import "@fontsource/roboto/700.css";
 
 import ConfigCarrier from "@components/ConfigCarrier.astro";
 import { profileConfig, siteConfig } from "@/config";
+import { extractLangFromPath, normalizeLang, setI18nLang } from "@i18n/translation";
 import {
 	AUTO_MODE,
 	BANNER_HEIGHT,
@@ -57,11 +58,10 @@ if (title) {
 const favicons: Favicon[] =
 	siteConfig.favicon.length > 0 ? siteConfig.favicon : defaultFavicons;
 
-// const siteLang = siteConfig.lang.replace('_', '-')
-if (!lang) {
-	lang = `${siteConfig.lang}`;
-}
-const siteLang = lang.replace("_", "-");
+const pathLang = extractLangFromPath(Astro.url.pathname);
+const resolvedLang = normalizeLang(lang || pathLang || siteConfig.lang);
+setI18nLang(resolvedLang);
+const siteLang = resolvedLang.replace("_", "-");
 
 const bannerOffsetByPosition = {
 	top: `${BANNER_HEIGHT_EXTEND}vh`,
@@ -279,6 +279,7 @@ const bannerEnabled = !!document.getElementById('banner-wrapper')
 
 interface MovingPolygon {
 	el: SVGGElement;
+	glowEl: SVGPolygonElement;
 	x: number;
 	y: number;
 	radius: number;
@@ -289,9 +290,36 @@ interface MovingPolygon {
 	angle: number;
 	angularVelocity: number;
 	angularAcceleration: number;
+	pulsePhase: number;
+	pulseSpeed: number;
+}
+
+interface FloatingFragment {
+	el: SVGCircleElement;
+	x: number;
+	y: number;
+	radius: number;
+	vx: number;
+	vy: number;
+	lifePhase: number;
+	lifeSpeed: number;
+}
+
+interface FloatingStreak {
+	el: SVGLineElement;
+	x: number;
+	y: number;
+	length: number;
+	vx: number;
+	vy: number;
+	angle: number;
+	lifePhase: number;
+	lifeSpeed: number;
 }
 
 let movingPolygons: MovingPolygon[] = [];
+let floatingFragments: FloatingFragment[] = [];
+let floatingStreaks: FloatingStreak[] = [];
 let bgAnimationFrameId: number | null = null;
 let lastAnimationTime = 0;
 
@@ -378,6 +406,7 @@ function startBackgroundAnimation() {
 			p.angularVelocity *= angularDampingFactor;
 			p.angularVelocity = clamp(p.angularVelocity, -MAX_ANGULAR_SPEED, MAX_ANGULAR_SPEED);
 			p.angle += p.angularVelocity * dt;
+			p.pulsePhase += p.pulseSpeed * dt;
 
 			if (p.x - p.radius < 0) {
 				p.x = p.radius;
@@ -400,7 +429,55 @@ function startBackgroundAnimation() {
 				p.ay *= -1;
 			}
 
+			const pulse = 0.5 + 0.5 * Math.sin(p.pulsePhase);
+			const glowOpacity = 0.02 + pulse * 0.075;
+			const glowScale = 1.02 + pulse * 0.28;
+			p.glowEl.setAttribute('opacity', glowOpacity.toFixed(3));
+			p.glowEl.setAttribute('transform', `scale(${glowScale.toFixed(3)})`);
+
 			p.el.setAttribute('transform', `translate(${p.x.toFixed(2)} ${p.y.toFixed(2)}) rotate(${(p.angle * 180 / Math.PI).toFixed(2)})`);
+		});
+
+		floatingFragments.forEach(fragment => {
+			fragment.x += fragment.vx * dt;
+			fragment.y += fragment.vy * dt;
+			fragment.lifePhase += fragment.lifeSpeed * dt;
+
+			if (fragment.x < -20) fragment.x = width + 20;
+			if (fragment.x > width + 20) fragment.x = -20;
+			if (fragment.y < -20) fragment.y = height + 20;
+			if (fragment.y > height + 20) fragment.y = -20;
+
+			const twinkle = 0.5 + 0.5 * Math.sin(fragment.lifePhase);
+			const opacity = 0.14 + twinkle * 0.28;
+			const r = fragment.radius * (0.9 + twinkle * 0.45);
+			fragment.el.setAttribute('cx', fragment.x.toFixed(2));
+			fragment.el.setAttribute('cy', fragment.y.toFixed(2));
+			fragment.el.setAttribute('r', r.toFixed(2));
+			fragment.el.setAttribute('opacity', opacity.toFixed(3));
+		});
+
+		floatingStreaks.forEach(streak => {
+			streak.x += streak.vx * dt;
+			streak.y += streak.vy * dt;
+			streak.lifePhase += streak.lifeSpeed * dt;
+
+			if (streak.x < -28) streak.x = width + 28;
+			if (streak.x > width + 28) streak.x = -28;
+			if (streak.y < -28) streak.y = height + 28;
+			if (streak.y > height + 28) streak.y = -28;
+
+			const shimmer = 0.5 + 0.5 * Math.sin(streak.lifePhase);
+			const opacity = 0.08 + shimmer * 0.2;
+			const length = streak.length * (0.85 + shimmer * 0.4);
+			const dx = Math.cos(streak.angle) * length;
+			const dy = Math.sin(streak.angle) * length;
+
+			streak.el.setAttribute('x1', (streak.x - dx * 0.5).toFixed(2));
+			streak.el.setAttribute('y1', (streak.y - dy * 0.5).toFixed(2));
+			streak.el.setAttribute('x2', (streak.x + dx * 0.5).toFixed(2));
+			streak.el.setAttribute('y2', (streak.y + dy * 0.5).toFixed(2));
+			streak.el.setAttribute('opacity', opacity.toFixed(3));
 		});
 
 		bgAnimationFrameId = requestAnimationFrame(animate);
@@ -425,8 +502,38 @@ function generateBackgroundPattern() {
 	svgElement.setAttribute('viewBox', `0 0 ${width} ${height}`);
 	svgElement.innerHTML = '';
 	movingPolygons = [];
+	floatingFragments = [];
+	floatingStreaks = [];
+
+	const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+	const glowFilter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
+	glowFilter.setAttribute('id', 'bg-shape-glow-filter');
+	glowFilter.setAttribute('x', '-120%');
+	glowFilter.setAttribute('y', '-120%');
+	glowFilter.setAttribute('width', '340%');
+	glowFilter.setAttribute('height', '340%');
+	glowFilter.setAttribute('color-interpolation-filters', 'sRGB');
+
+	const blur = document.createElementNS('http://www.w3.org/2000/svg', 'feGaussianBlur');
+	blur.setAttribute('in', 'SourceGraphic');
+	blur.setAttribute('stdDeviation', '6.2');
+	blur.setAttribute('result', 'blurredGlow');
+
+	const merge = document.createElementNS('http://www.w3.org/2000/svg', 'feMerge');
+	const mergeNodeA = document.createElementNS('http://www.w3.org/2000/svg', 'feMergeNode');
+	mergeNodeA.setAttribute('in', 'blurredGlow');
+	const mergeNodeB = document.createElementNS('http://www.w3.org/2000/svg', 'feMergeNode');
+	mergeNodeB.setAttribute('in', 'SourceGraphic');
+	merge.appendChild(mergeNodeA);
+	merge.appendChild(mergeNodeB);
+
+	glowFilter.appendChild(blur);
+	glowFilter.appendChild(merge);
+	defs.appendChild(glowFilter);
+	svgElement.appendChild(defs);
 
 	const density = clamp(patternConfig?.density ?? 1, 0.4, 2.5);
+	const particleDensity = clamp(patternConfig?.particleDensity ?? 1, 0.3, 3.5);
 	const strokeAlpha = clamp(patternConfig?.strokeAlpha ?? 0.16, 0.03, 0.45);
 	const topSafeZoneRatio = clamp(patternConfig?.topSafeZoneRatio ?? 0.42, 0.15, 0.75);
 
@@ -473,9 +580,19 @@ function generateBackgroundPattern() {
 			vertices.push(`${px.toFixed(1)},${py.toFixed(1)}`);
 		}
 
+		const pointsValue = vertices.join(' ');
 		const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+
+		const glowPolygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+		glowPolygon.setAttribute('points', pointsValue);
+		glowPolygon.setAttribute('fill', `oklch(0.84 0.16 calc(var(--hue) + ${Math.round(random() * 24 - 12)}) / 0.1)`);
+		glowPolygon.setAttribute('stroke', 'none');
+		glowPolygon.setAttribute('filter', 'url(#bg-shape-glow-filter)');
+		glowPolygon.setAttribute('opacity', (0.035 + random() * 0.055).toFixed(3));
+		group.appendChild(glowPolygon);
+
 		const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
-		polygon.setAttribute('points', vertices.join(' '));
+		polygon.setAttribute('points', pointsValue);
 		polygon.setAttribute('fill', 'none');
 		polygon.setAttribute('stroke', `oklch(0.73 0.09 var(--hue) / ${strokeAlpha.toFixed(3)})`);
 		polygon.setAttribute('stroke-width', (1 + random() * 1.1).toFixed(2));
@@ -490,6 +607,7 @@ function generateBackgroundPattern() {
 
 		movingPolygons.push({
 			el: group,
+			glowEl: glowPolygon,
 			x,
 			y,
 			radius: r,
@@ -500,8 +618,66 @@ function generateBackgroundPattern() {
 			angle: random() * Math.PI * 2,
 			angularVelocity: (random() * 2 - 1) * 0.9,
 			angularAcceleration: (random() * 2 - 1) * 0.18,
+			pulsePhase: random() * Math.PI * 2,
+			pulseSpeed: 0.7 + random() * 1.4,
 		});
 	});
+
+	const fragmentCount = Math.max(26, Math.floor((width * height) / 26000 * density * particleDensity));
+	for (let i = 0; i < fragmentCount; i += 1) {
+		const x = random() * width;
+		const y = topSafeZone + random() * Math.max(1, height - topSafeZone - 8);
+		const radius = 0.75 + random() * 2.2;
+		const fragment = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+		fragment.setAttribute('cx', x.toFixed(2));
+		fragment.setAttribute('cy', y.toFixed(2));
+		fragment.setAttribute('r', radius.toFixed(2));
+		fragment.setAttribute('fill', `oklch(0.9 0.14 calc(var(--hue) + ${Math.round(random() * 40 - 20)}) / ${ (0.22 + random() * 0.2).toFixed(3) })`);
+		fragment.setAttribute('filter', 'url(#bg-shape-glow-filter)');
+		svgElement.appendChild(fragment);
+
+		const speed = 4 + random() * 13;
+		const direction = random() * Math.PI * 2;
+
+		floatingFragments.push({
+			el: fragment,
+			x,
+			y,
+			radius,
+			vx: Math.cos(direction) * speed,
+			vy: Math.sin(direction) * speed,
+			lifePhase: random() * Math.PI * 2,
+			lifeSpeed: 0.8 + random() * 2.6,
+		});
+	}
+
+	const streakCount = Math.max(12, Math.floor((width * height) / 98000 * density * particleDensity));
+	for (let i = 0; i < streakCount; i += 1) {
+		const x = random() * width;
+		const y = topSafeZone + random() * Math.max(1, height - topSafeZone - 10);
+		const length = 6 + random() * 14;
+		const angle = random() * Math.PI * 2;
+		const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+		line.setAttribute('stroke', `oklch(0.9 0.12 calc(var(--hue) + ${Math.round(random() * 42 - 21)}) / ${ (0.16 + random() * 0.16).toFixed(3) })`);
+		line.setAttribute('stroke-width', (0.55 + random() * 0.95).toFixed(2));
+		line.setAttribute('stroke-linecap', 'round');
+		line.setAttribute('filter', 'url(#bg-shape-glow-filter)');
+		svgElement.appendChild(line);
+
+		const speed = 8 + random() * 22;
+		const direction = angle + (random() * 0.65 - 0.325);
+		floatingStreaks.push({
+			el: line,
+			x,
+			y,
+			length,
+			vx: Math.cos(direction) * speed,
+			vy: Math.sin(direction) * speed,
+			angle,
+			lifePhase: random() * Math.PI * 2,
+			lifeSpeed: 1 + random() * 2.4,
+		});
+	}
 
 	startBackgroundAnimation();
 }

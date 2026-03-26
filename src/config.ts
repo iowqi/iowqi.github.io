@@ -21,8 +21,10 @@ export const siteConfig: SiteConfig = {
 		position: "center", // Equivalent to object-position, only supports 'top', 'center', 'bottom'. 'center' by default
 		welcomeText: {
 			enable: true, // Display welcome text on top of banner
-			content: "Welcome to my blog", // Text content displayed in the banner typing effect
+			content: ["Hello there👋, welcome!", "欢迎光临OwO", "Have a nice day!🌞", "陌生人，坐下来喝杯茶吧🍵"], // Texts displayed in the banner typing loop
 			typingSpeed: 120, // Milliseconds per character
+			holdAfterTypedMs: 1000, // Wait after each string is fully typed
+			holdAfterDeletedMs: 280, // Wait after each string is fully deleted
 			fontFamily: "\"Space Grotesk\", \"Segoe UI\", \"Inter\", system-ui, -apple-system, sans-serif", // CSS font-family for banner welcome text
 			fontWeight: 800, // 600~900 recommended
 			fontSizeMobileRem: 3, // Mobile font size (rem)
@@ -57,6 +59,7 @@ export const siteConfig: SiteConfig = {
 	backgroundPattern: {
 		enable: true,
 		density: 1, // 0.4 ~ 2.5, larger means more polygons
+		particleDensity: 0.5, // 0.3 ~ 3.5, controls tiny particles & streak fragments
 		strokeAlpha: 0.16, // 0.03 ~ 0.45, line opacity
 		topSafeZoneRatio: 0.42, // Keep top area cleaner to avoid banner clipping
 		seed: "iowqi-bg-v1", // Fixed seed for deterministic pattern. Set empty/undefined for session seed

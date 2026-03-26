@@ -13,6 +13,7 @@ import type { LIGHT_DARK_MODE } from "@/types/config.ts";
 
 const seq: LIGHT_DARK_MODE[] = [LIGHT_MODE, DARK_MODE, AUTO_MODE];
 let mode: LIGHT_DARK_MODE = $state(AUTO_MODE);
+let hideTimer: number | null = null;
 
 onMount(() => {
 	mode = getStoredTheme();
@@ -46,28 +47,46 @@ function toggleScheme() {
 	switchScheme(seq[(i + 1) % seq.length]);
 }
 
+function clearHideTimer() {
+	if (hideTimer !== null) {
+		window.clearTimeout(hideTimer);
+		hideTimer = null;
+	}
+}
+
 function showPanel() {
+	clearHideTimer();
 	const panel = document.querySelector("#light-dark-panel");
 	const displayPanel = document.querySelector("#display-setting");
+	const languagePanel = document.querySelector("#language-panel");
 	if (displayPanel) {
 		displayPanel.classList.add("float-panel-closed");
+	}
+	if (languagePanel) {
+		languagePanel.classList.add("float-panel-closed");
 	}
 	if (panel) {
 		panel.classList.remove("float-panel-closed");
 	}
 }
 
-function hidePanel() {
-	const panel = document.querySelector("#light-dark-panel");
-	if (panel) {
-		panel.classList.add("float-panel-closed");
-	}
+function scheduleHidePanel() {
+	clearHideTimer();
+	hideTimer = window.setTimeout(() => {
+		const panel = document.querySelector("#light-dark-panel");
+		const button = document.querySelector("#scheme-switch");
+		const panelHovered = panel?.matches(":hover");
+		const buttonHovered = button?.matches(":hover");
+		if (!panelHovered && !buttonHovered && panel) {
+			panel.classList.add("float-panel-closed");
+		}
+	}, 220);
 }
 </script>
 
 <!-- z-50 make the panel higher than other float panels -->
-<div class="relative z-50" role="menu" tabindex="-1" onmouseleave={hidePanel}>
-    <button aria-label="Light/Dark Mode" role="menuitem" class="relative btn-plain scale-animation rounded-lg h-11 w-11 active:scale-90" id="scheme-switch" onclick={toggleScheme} onmouseenter={showPanel}>
+<div class="relative z-50" role="menu" tabindex="-1">
+    <button aria-label="Light/Dark Mode" role="menuitem" class="relative btn-plain scale-animation rounded-lg h-11 w-11 active:scale-90" id="scheme-switch" onclick={toggleScheme} onmouseenter={showPanel} onmouseleave={scheduleHidePanel}>
         <div class="absolute" class:opacity-0={mode !== LIGHT_MODE}>
             <Icon icon="material-symbols:wb-sunny-outline-rounded" class="text-[1.25rem]"></Icon>
         </div>
@@ -79,7 +98,7 @@ function hidePanel() {
         </div>
     </button>
 
-    <div id="light-dark-panel" class="hidden lg:block absolute transition float-panel-closed top-[3.85rem] mt-2 -right-2" >
+    <div id="light-dark-panel" class="hidden lg:block absolute transition float-panel-closed top-[3.85rem] mt-2 -right-2" onmouseenter={showPanel} onmouseleave={scheduleHidePanel}>
         <div class="card-base p-2">
             <button class="flex transition whitespace-nowrap items-center !justify-start w-full btn-plain scale-animation rounded-lg h-9 px-3 font-medium active:scale-95 mb-0.5"
                     class:current-theme-btn={mode === LIGHT_MODE}

@@ -9,534 +9,939 @@ import ImageWrapper from "../components/misc/ImageWrapper.astro";
 import TOC from "../components/widget/TOC.astro";
 import { siteConfig } from "../config";
 import {
-	BANNER_HEIGHT,
-	BANNER_HEIGHT_EXTEND,
-	MAIN_PANEL_OVERLAPS_BANNER_HEIGHT,
+    BANNER_HEIGHT,
+    BANNER_HEIGHT_EXTEND,
+    MAIN_PANEL_OVERLAPS_BANNER_HEIGHT,
 } from "../constants/constants";
 import Layout from "./Layout.astro";
 
 interface Props {
-	title?: string;
-	banner?: string;
-	description?: string;
-	lang?: string;
-	setOGTypeArticle?: boolean;
-	headings?: MarkdownHeading[];
+    title?: string;
+    banner?: string;
+    description?: string;
+    lang?: string;
+    setOGTypeArticle?: boolean;
+    headings?: MarkdownHeading[];
 }
 
 const {
-	title,
-	banner,
-	description,
-	lang,
-	setOGTypeArticle,
-	headings = [],
+    title,
+    banner,
+    description,
+    lang,
+    setOGTypeArticle,
+    headings = [],
 } = Astro.props;
 const hasBannerCredit =
-	siteConfig.banner.enable && siteConfig.banner.credit.enable;
+    siteConfig.banner.enable && siteConfig.banner.credit.enable;
 const hasBannerLink = !!siteConfig.banner.credit.url;
 
 const bannerSrc = siteConfig.banner.src;
 const bannerDarkSrc = bannerSrc.includes(".")
-	? bannerSrc.replace(/(\.[^./]+)$/, "-dark$1")
-	: `${bannerSrc}-dark`;
+    ? bannerSrc.replace(/(\.[^./]+)$/, "-dark$1")
+    : `${bannerSrc}-dark`;
 
 const mainPanelTop = siteConfig.banner.enable
-	? `calc(${BANNER_HEIGHT}vh - ${MAIN_PANEL_OVERLAPS_BANNER_HEIGHT}rem)`
-	: "5.5rem";
+    ? `calc(${BANNER_HEIGHT}vh - ${MAIN_PANEL_OVERLAPS_BANNER_HEIGHT}rem)`
+    : "5.5rem";
 
 const bannerParallaxConfig = {
-	enable: siteConfig.banner.parallax?.enable ?? false,
-	maxOffset: siteConfig.banner.parallax?.maxOffset ?? 38,
-	scrollFactor: siteConfig.banner.parallax?.scrollFactor ?? 0.12,
-	spring: siteConfig.banner.parallax?.spring ?? 0.08,
-	damping: siteConfig.banner.parallax?.damping ?? 0.82,
-	targetDecay: siteConfig.banner.parallax?.targetDecay ?? 0.92,
-	gradientMultiplier: siteConfig.banner.parallax?.gradientMultiplier ?? 1.2,
+    enable: siteConfig.banner.parallax?.enable ?? false,
+    maxOffset: siteConfig.banner.parallax?.maxOffset ?? 38,
+    scrollFactor: siteConfig.banner.parallax?.scrollFactor ?? 0.12,
+    spring: siteConfig.banner.parallax?.spring ?? 0.08,
+    damping: siteConfig.banner.parallax?.damping ?? 0.82,
+    targetDecay: siteConfig.banner.parallax?.targetDecay ?? 0.92,
+    gradientMultiplier: siteConfig.banner.parallax?.gradientMultiplier ?? 1.2,
 };
 
+const welcomeTextContent = siteConfig.banner.welcomeText?.content;
+const welcomeTextList = (
+    Array.isArray(welcomeTextContent)
+        ? welcomeTextContent
+        : [welcomeTextContent ?? "Welcome"]
+).filter(
+    (text): text is string =>
+        typeof text === "string" && text.trim().length > 0,
+);
+
 const bannerWelcomeConfig = {
-	enable: siteConfig.banner.welcomeText?.enable ?? true,
-	content: siteConfig.banner.welcomeText?.content ?? "Welcome",
-	typingSpeed: siteConfig.banner.welcomeText?.typingSpeed ?? 120,
-	fontFamily:
-		siteConfig.banner.welcomeText?.fontFamily ??
-		'"Space Grotesk", "Segoe UI", "Inter", system-ui, -apple-system, sans-serif',
-	fontWeight: siteConfig.banner.welcomeText?.fontWeight ?? 800,
-	fontSizeMobileRem: siteConfig.banner.welcomeText?.fontSizeMobileRem ?? 3,
-	fontSizeDesktopRem: siteConfig.banner.welcomeText?.fontSizeDesktopRem ?? 4.5,
-	letterSpacingEm: siteConfig.banner.welcomeText?.letterSpacingEm ?? 0.16,
-	lineHeight: siteConfig.banner.welcomeText?.lineHeight ?? 1.3,
-	containerPaddingYRem: siteConfig.banner.welcomeText?.containerPaddingYRem ?? 0.55,
-	gradientDurationMs: siteConfig.banner.welcomeText?.gradientDurationMs ?? 5200,
-	waveDurationMs: siteConfig.banner.welcomeText?.waveDurationMs ?? 2600,
-	waveAmplitudePx: siteConfig.banner.welcomeText?.waveAmplitudePx ?? 16.8,
-	waveRotateDeg: siteConfig.banner.welcomeText?.waveRotateDeg ?? 5.2,
+    enable: siteConfig.banner.welcomeText?.enable ?? true,
+    contents: welcomeTextList.length > 0 ? welcomeTextList : ["Welcome"],
+    typingSpeed: siteConfig.banner.welcomeText?.typingSpeed ?? 120,
+    holdAfterTypedMs: siteConfig.banner.welcomeText?.holdAfterTypedMs ?? 1000,
+    holdAfterDeletedMs:
+        siteConfig.banner.welcomeText?.holdAfterDeletedMs ?? 280,
+    fontFamily:
+        siteConfig.banner.welcomeText?.fontFamily ??
+        '"Space Grotesk", "Segoe UI", "Inter", system-ui, -apple-system, sans-serif',
+    fontWeight: siteConfig.banner.welcomeText?.fontWeight ?? 800,
+    fontSizeMobileRem: siteConfig.banner.welcomeText?.fontSizeMobileRem ?? 3,
+    fontSizeDesktopRem:
+        siteConfig.banner.welcomeText?.fontSizeDesktopRem ?? 4.5,
+    letterSpacingEm: siteConfig.banner.welcomeText?.letterSpacingEm ?? 0.16,
+    lineHeight: siteConfig.banner.welcomeText?.lineHeight ?? 1.3,
+    containerPaddingYRem:
+        siteConfig.banner.welcomeText?.containerPaddingYRem ?? 0.55,
+    gradientDurationMs:
+        siteConfig.banner.welcomeText?.gradientDurationMs ?? 5200,
+    waveDurationMs: siteConfig.banner.welcomeText?.waveDurationMs ?? 2600,
+    waveAmplitudePx: siteConfig.banner.welcomeText?.waveAmplitudePx ?? 16.8,
+    waveRotateDeg: siteConfig.banner.welcomeText?.waveRotateDeg ?? 5.2,
 };
 ---
 
-<Layout title={title} banner={banner} description={description} lang={lang} setOGTypeArticle={setOGTypeArticle}>
-
-<!-- Navbar -->
-<slot slot="head" name="head"></slot>
-<div id="top-row" class="z-50 pointer-events-none relative transition-all duration-700 max-w-[var(--page-width)] px-0 md:px-4 mx-auto" class:list={[""]}>
-    <div id="navbar-wrapper" class="pointer-events-auto sticky top-0 transition-all">
-        <Navbar></Navbar>
-    </div>
-</div>
-
-<!-- Banner -->
-{siteConfig.banner.enable && <div id="banner-wrapper" class={`absolute z-10 w-full transition duration-700`} style={`top: -${BANNER_HEIGHT_EXTEND}vh`}>
-    <div id="banner-parallax-layer" class="relative h-full">
-        <div class="h-full overflow-hidden">
-            <ImageWrapper
-                id="banner"
-                alt="Banner image of the blog"
-                class:list={["object-cover h-full transition duration-700 opacity-0 scale-105"]}
-                src={bannerSrc}
-                darkSrc={bannerDarkSrc}
-                position={siteConfig.banner.position}
-                data-banner-parallax
-            />
+<Layout
+    title={title}
+    banner={banner}
+    description={description}
+    lang={lang}
+    setOGTypeArticle={setOGTypeArticle}
+>
+    <!-- Navbar -->
+    <slot slot="head" name="head" />
+    <div
+        id="top-row"
+        class="z-50 pointer-events-none relative transition-all duration-700 max-w-[var(--page-width)] px-0 md:px-4 mx-auto"
+        class:list={[""]}
+    >
+        <div
+            id="navbar-wrapper"
+            class="pointer-events-auto sticky top-0 transition-all"
+        >
+            <Navbar />
         </div>
-        <div
-            aria-hidden="true"
-            data-banner-gradient
-            class="pointer-events-none absolute inset-x-0 -bottom-px h-[2px] bg-[var(--page-bg)]"
-        ></div>
-        <div
-            aria-hidden="true"
-            data-banner-gradient
-            class="pointer-events-none absolute inset-x-0 bottom-0 h-32 md:h-40 bg-gradient-to-t from-[var(--page-bg)] via-[var(--page-bg)]/70 to-transparent"
-        ></div>
-        <div
-            aria-hidden="true"
-            data-banner-gradient
-            class="pointer-events-none absolute inset-x-0 top-full h-24 md:h-32 bg-gradient-to-b from-[var(--page-bg)] via-[var(--page-bg)]/70 to-transparent"
-        ></div>
-        {bannerWelcomeConfig.enable && <div
-            class="pointer-events-none absolute inset-0 z-20 flex items-center justify-center overflow-visible px-4"
-            style={`padding-top:${bannerWelcomeConfig.containerPaddingYRem}rem;padding-bottom:${bannerWelcomeConfig.containerPaddingYRem}rem;`}
-        >
-            <h1
-                id="banner-welcome-text"
-                class="opacity-0 banner-welcome-modern"
-                style={`--banner-welcome-font-family:${bannerWelcomeConfig.fontFamily};--banner-welcome-font-weight:${bannerWelcomeConfig.fontWeight};--banner-welcome-size-mobile:${bannerWelcomeConfig.fontSizeMobileRem}rem;--banner-welcome-size-desktop:${bannerWelcomeConfig.fontSizeDesktopRem}rem;--banner-welcome-letter-spacing:${bannerWelcomeConfig.letterSpacingEm}em;--banner-welcome-line-height:${bannerWelcomeConfig.lineHeight};--banner-welcome-gradient-duration:${bannerWelcomeConfig.gradientDurationMs}ms;--banner-welcome-wave-duration:${bannerWelcomeConfig.waveDurationMs}ms;--banner-welcome-wave-amplitude:${bannerWelcomeConfig.waveAmplitudePx}px;--banner-welcome-wave-rotate:${bannerWelcomeConfig.waveRotateDeg}deg;`}
-                data-full-text={bannerWelcomeConfig.content}
-                data-typing-speed={bannerWelcomeConfig.typingSpeed}
-                data-wave-duration-ms={bannerWelcomeConfig.waveDurationMs}
-                aria-label={bannerWelcomeConfig.content}
-            ></h1>
-        </div>}
     </div>
-</div>}
 
-<!-- Main content -->
-<div class="absolute w-full z-30 pointer-events-none" style={`top: ${mainPanelTop}`}>
-    <!-- The pointer-events-none here prevent blocking the click event of the TOC -->
-    <div class="relative max-w-[var(--page-width)] mx-auto pointer-events-auto">
-        <div id="main-grid" class="transition duration-700 w-full left-0 right-0 grid grid-cols-[17.5rem_auto] grid-rows-[auto_1fr_auto] lg:grid-rows-[auto]
-    mx-auto gap-4 px-0 md:px-4"
-        >
-            <!-- Banner image credit -->
-            {hasBannerCredit && <a href={siteConfig.banner.credit.url} id="banner-credit" target="_blank" rel="noopener" aria-label="Visit image source"
-                                   class:list={["group onload-animation transition-all absolute flex justify-center items-center rounded-full " +
-                                   "px-3 right-4 -top-[3.25rem] bg-black/60 hover:bg-black/70 h-9", {"hover:pr-9 active:bg-black/80": hasBannerLink}]}
+    <!-- Banner -->
+    {
+        siteConfig.banner.enable && (
+            <div
+                id="banner-wrapper"
+                class={`absolute z-10 w-full transition duration-700`}
+                style={`top: -${BANNER_HEIGHT_EXTEND}vh`}
             >
-                <Icon class="text-white/75 text-[1.25rem] mr-1" name="material-symbols:copyright-outline-rounded" ></Icon>
-                <div class="text-white/75 text-xs">{siteConfig.banner.credit.text}</div>
-                <Icon class:list={["transition absolute text-[oklch(0.75_0.14_var(--hue))] right-4 text-[0.75rem] opacity-0",
-                    {"group-hover:opacity-100": hasBannerLink}]}
-                      name="fa6-solid:arrow-up-right-from-square">
-                </Icon>
-            </a>}
-
-
-            <SideBar class="mb-4 row-start-2 row-end-3 col-span-2 lg:row-start-1 lg:row-end-2 lg:col-span-1 lg:max-w-[17.5rem] onload-animation" headings={headings}></SideBar>
-
-            <main id="swup-container" class="transition-swup-fade col-span-2 lg:col-span-1 overflow-hidden">
-                <div id="content-wrapper" class="onload-animation">
-                    <!-- the overflow-hidden here prevent long text break the layout-->
-                    <!-- make id different from windows.swup global property -->
-                    <slot></slot>
-                    <div class="footer col-span-2 onload-animation hidden lg:block">
-                        <Footer></Footer>
+                <div id="banner-parallax-layer" class="relative h-full">
+                    <div class="h-full overflow-hidden">
+                        <ImageWrapper
+                            id="banner"
+                            alt="Banner image of the blog"
+                            class:list={[
+                                "object-cover h-full transition duration-700 opacity-0 scale-105",
+                            ]}
+                            src={bannerSrc}
+                            darkSrc={bannerDarkSrc}
+                            position={siteConfig.banner.position}
+                            data-banner-parallax
+                        />
                     </div>
+                    <div
+                        aria-hidden="true"
+                        data-banner-gradient
+                        class="pointer-events-none absolute inset-x-0 -bottom-px h-[2px] bg-[var(--page-bg)]"
+                    />
+                    <div
+                        aria-hidden="true"
+                        data-banner-gradient
+                        class="pointer-events-none absolute inset-x-0 bottom-0 h-32 md:h-40 bg-gradient-to-t from-[var(--page-bg)] via-[var(--page-bg)]/70 to-transparent"
+                    />
+                    <div
+                        aria-hidden="true"
+                        data-banner-gradient
+                        class="pointer-events-none absolute inset-x-0 top-full h-24 md:h-32 bg-gradient-to-b from-[var(--page-bg)] via-[var(--page-bg)]/70 to-transparent"
+                    />
+                    {bannerWelcomeConfig.enable && (
+                        <div
+                            class="pointer-events-none absolute inset-0 z-20 flex items-center justify-center overflow-visible px-4"
+                            style={`padding-top:${bannerWelcomeConfig.containerPaddingYRem}rem;padding-bottom:${bannerWelcomeConfig.containerPaddingYRem}rem;`}
+                        >
+                            <h1
+                                id="banner-welcome-text"
+                                class="opacity-0 banner-welcome-modern"
+                                style={`--banner-welcome-font-family:${bannerWelcomeConfig.fontFamily};--banner-welcome-font-weight:${bannerWelcomeConfig.fontWeight};--banner-welcome-size-mobile:${bannerWelcomeConfig.fontSizeMobileRem}rem;--banner-welcome-size-desktop:${bannerWelcomeConfig.fontSizeDesktopRem}rem;--banner-welcome-letter-spacing:${bannerWelcomeConfig.letterSpacingEm}em;--banner-welcome-line-height:${bannerWelcomeConfig.lineHeight};--banner-welcome-gradient-duration:${bannerWelcomeConfig.gradientDurationMs}ms;--banner-welcome-wave-duration:${bannerWelcomeConfig.waveDurationMs}ms;--banner-welcome-wave-amplitude:${bannerWelcomeConfig.waveAmplitudePx}px;--banner-welcome-wave-rotate:${bannerWelcomeConfig.waveRotateDeg}deg;`}
+                                data-full-texts={JSON.stringify(
+                                    bannerWelcomeConfig.contents,
+                                )}
+                                data-typing-speed={
+                                    bannerWelcomeConfig.typingSpeed
+                                }
+                                data-hold-after-typed-ms={
+                                    bannerWelcomeConfig.holdAfterTypedMs
+                                }
+                                data-hold-after-deleted-ms={
+                                    bannerWelcomeConfig.holdAfterDeletedMs
+                                }
+                                data-wave-duration-ms={
+                                    bannerWelcomeConfig.waveDurationMs
+                                }
+                                aria-label={bannerWelcomeConfig.contents.join(
+                                    " / ",
+                                )}
+                            />
+                        </div>
+                    )}
                 </div>
-            </main>
-
-            <div class="footer col-span-2 onload-animation block lg:hidden">
-                <Footer></Footer>
             </div>
-        </div>
+        )
+    }
 
-        <BackToTop></BackToTop>
-    </div>
-</div>
-
-<!-- The things that should be under the banner, only the TOC for now -->
-<div class="absolute w-full z-0 hidden 2xl:block">
-    <div class="relative max-w-[var(--page-width)] mx-auto">
-        <!-- TOC component -->
-        {siteConfig.toc.enable && <div id="toc-wrapper" class:list={["hidden lg:block transition absolute top-0 -right-[var(--toc-width)] w-[var(--toc-width)] items-center",
-            {"toc-hide": siteConfig.banner.enable}]}
+    <!-- Main content -->
+    <div
+        class="absolute w-full z-30 pointer-events-none"
+        style={`top: ${mainPanelTop}`}
+    >
+        <!-- The pointer-events-none here prevent blocking the click event of the TOC -->
+        <div
+            class="relative max-w-[var(--page-width)] mx-auto pointer-events-auto"
         >
-            <div id="toc-inner-wrapper" class="fixed top-14 w-[var(--toc-width)] h-[calc(100vh_-_20rem)] overflow-y-scroll overflow-x-hidden hide-scrollbar">
-                <div id="toc" class="w-full h-full transition-swup-fade ">
-                    <div class="h-8 w-full"></div>
-                    <TOC headings={headings}></TOC>
-                    <div class="h-8 w-full"></div>
+            <div
+                id="main-grid"
+                class="transition duration-700 w-full left-0 right-0 grid grid-cols-[17.5rem_auto] grid-rows-[auto_1fr_auto] lg:grid-rows-[auto]
+    mx-auto gap-4 px-0 md:px-4"
+            >
+                <!-- Banner image credit -->
+                {
+                    hasBannerCredit && (
+                        <a
+                            href={siteConfig.banner.credit.url}
+                            id="banner-credit"
+                            target="_blank"
+                            rel="noopener"
+                            aria-label="Visit image source"
+                            class:list={[
+                                "group onload-animation transition-all absolute flex justify-center items-center rounded-full " +
+                                    "px-3 right-4 -top-[3.25rem] bg-black/60 hover:bg-black/70 h-9",
+                                {
+                                    "hover:pr-9 active:bg-black/80":
+                                        hasBannerLink,
+                                },
+                            ]}
+                        >
+                            <Icon
+                                class="text-white/75 text-[1.25rem] mr-1"
+                                name="material-symbols:copyright-outline-rounded"
+                            />
+                            <div class="text-white/75 text-xs">
+                                {siteConfig.banner.credit.text}
+                            </div>
+                            <Icon
+                                class:list={[
+                                    "transition absolute text-[oklch(0.75_0.14_var(--hue))] right-4 text-[0.75rem] opacity-0",
+                                    {
+                                        "group-hover:opacity-100":
+                                            hasBannerLink,
+                                    },
+                                ]}
+                                name="fa6-solid:arrow-up-right-from-square"
+                            ></Icon>
+                        </a>
+                    )
+                }
+
+                <SideBar
+                    class="mb-4 row-start-2 row-end-3 col-span-2 lg:row-start-1 lg:row-end-2 lg:col-span-1 lg:max-w-[17.5rem] onload-animation"
+                    headings={headings}
+                />
+
+                <main
+                    id="swup-container"
+                    class="transition-swup-fade col-span-2 lg:col-span-1 overflow-visible"
+                >
+                    <div id="content-wrapper" class="onload-animation">
+                        <!-- the overflow-hidden here prevent long text break the layout-->
+                        <!-- make id different from windows.swup global property -->
+                        <slot />
+                        <div
+                            class="footer col-span-2 onload-animation hidden lg:block"
+                        >
+                            <Footer />
+                        </div>
+                    </div>
+                </main>
+
+                <div class="footer col-span-2 onload-animation block lg:hidden">
+                    <Footer />
                 </div>
             </div>
-        </div>}
 
-        <!-- #toc needs to exist for Swup to work normally -->
-        {!siteConfig.toc.enable && <div id="toc"></div>}
+            <BackToTop />
+        </div>
     </div>
-</div>
 
-<script is:inline define:vars={{ bannerParallaxConfig }}>
-    (() => {
-        let cleanup = null;
-
-        const init = () => {
-            if (cleanup) {
-                cleanup();
-                cleanup = null;
+    <!-- The things that should be under the banner, only the TOC for now -->
+    <div class="absolute w-full z-0 hidden 2xl:block">
+        <div class="relative max-w-[var(--page-width)] mx-auto">
+            <!-- TOC component -->
+            {
+                siteConfig.toc.enable && (
+                    <div
+                        id="toc-wrapper"
+                        class:list={[
+                            "hidden lg:block transition absolute top-0 -right-[var(--toc-width)] w-[var(--toc-width)] items-center",
+                            { "toc-hide": siteConfig.banner.enable },
+                        ]}
+                    >
+                        <div
+                            id="toc-inner-wrapper"
+                            class="fixed top-14 w-[var(--toc-width)] h-[calc(100vh_-_20rem)] overflow-y-scroll overflow-x-hidden hide-scrollbar"
+                        >
+                            <div
+                                id="toc"
+                                class="w-full h-full transition-swup-fade "
+                            >
+                                <div class="h-8 w-full" />
+                                <TOC headings={headings} />
+                                <div class="h-8 w-full" />
+                            </div>
+                        </div>
+                    </div>
+                )
             }
 
-            const banner = document.querySelector("#banner");
-            const parallaxLayer = document.querySelector("#banner-parallax-layer");
-            const gradientEls = Array.from(document.querySelectorAll("[data-banner-gradient]"));
+            <!-- #toc needs to exist for Swup to work normally -->
+            {!siteConfig.toc.enable && <div id="toc" />}
+        </div>
+    </div>
 
-            if (!banner || !parallaxLayer || gradientEls.length === 0) return;
+    <script is:inline define:vars={{ bannerParallaxConfig }}>
+        (() => {
+            let cleanup = null;
 
-            let current = 0;
-            let velocity = 0;
-            let target = 0;
-            let rafId = 0;
-            let running = false;
-            let lastScrollY = window.scrollY;
-
-            if (!bannerParallaxConfig?.enable) return;
-
-            const maxOffset = Number(bannerParallaxConfig.maxOffset) || 38;
-            const scrollFactor = Number(bannerParallaxConfig.scrollFactor) || 0.12;
-            const spring = Number(bannerParallaxConfig.spring) || 0.08;
-            const damping = Number(bannerParallaxConfig.damping) || 0.82;
-            const targetDecay = Number(bannerParallaxConfig.targetDecay) || 0.92;
-            const gradientMultiplier = Number(bannerParallaxConfig.gradientMultiplier) || 1.2;
-
-            const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
-
-            const render = (y) => {
-                parallaxLayer.style.transform = `translate3d(0, ${y}px, 0)`;
-                banner.style.transform = "translate3d(0, 0, 0)";
-                const gradientExtraOffset = y * (gradientMultiplier - 1);
-                for (const el of gradientEls) {
-                    el.style.transform = `translate3d(0, ${gradientExtraOffset}px, 0)`;
+            const init = () => {
+                if (cleanup) {
+                    cleanup();
+                    cleanup = null;
                 }
-            };
 
-            const animate = () => {
-                target *= targetDecay;
+                const banner = document.querySelector("#banner");
+                const parallaxLayer = document.querySelector(
+                    "#banner-parallax-layer",
+                );
+                const gradientEls = Array.from(
+                    document.querySelectorAll("[data-banner-gradient]"),
+                );
 
-                const force = (target - current) * spring;
-                velocity = (velocity + force) * damping;
-                current += velocity;
-
-                render(current);
-
-                const stillMoving =
-                    Math.abs(velocity) > 0.02 ||
-                    Math.abs(current) > 0.02 ||
-                    Math.abs(target) > 0.02;
-
-                if (stillMoving) {
-                    rafId = requestAnimationFrame(animate);
+                if (!banner || !parallaxLayer || gradientEls.length === 0)
                     return;
+
+                let current = 0;
+                let velocity = 0;
+                let target = 0;
+                let rafId = 0;
+                let running = false;
+                let lastScrollY = window.scrollY;
+
+                if (!bannerParallaxConfig?.enable) return;
+
+                const maxOffset = Number(bannerParallaxConfig.maxOffset) || 38;
+                const scrollFactor =
+                    Number(bannerParallaxConfig.scrollFactor) || 0.12;
+                const spring = Number(bannerParallaxConfig.spring) || 0.08;
+                const damping = Number(bannerParallaxConfig.damping) || 0.82;
+                const targetDecay =
+                    Number(bannerParallaxConfig.targetDecay) || 0.92;
+                const gradientMultiplier =
+                    Number(bannerParallaxConfig.gradientMultiplier) || 1.2;
+
+                const clamp = (value, min, max) =>
+                    Math.max(min, Math.min(max, value));
+
+                const render = (y) => {
+                    parallaxLayer.style.transform = `translate3d(0, ${y}px, 0)`;
+                    banner.style.transform = "translate3d(0, 0, 0)";
+                    const gradientExtraOffset = y * (gradientMultiplier - 1);
+                    for (const el of gradientEls) {
+                        el.style.transform = `translate3d(0, ${gradientExtraOffset}px, 0)`;
+                    }
+                };
+
+                const animate = () => {
+                    target *= targetDecay;
+
+                    const force = (target - current) * spring;
+                    velocity = (velocity + force) * damping;
+                    current += velocity;
+
+                    render(current);
+
+                    const stillMoving =
+                        Math.abs(velocity) > 0.02 ||
+                        Math.abs(current) > 0.02 ||
+                        Math.abs(target) > 0.02;
+
+                    if (stillMoving) {
+                        rafId = requestAnimationFrame(animate);
+                        return;
+                    }
+
+                    current = 0;
+                    velocity = 0;
+                    target = 0;
+                    render(0);
+                    running = false;
+                };
+
+                const onScroll = () => {
+                    const y = window.scrollY;
+                    const delta = y - lastScrollY;
+                    lastScrollY = y;
+
+                    target = clamp(
+                        target + delta * scrollFactor,
+                        -maxOffset,
+                        maxOffset,
+                    );
+
+                    if (!running) {
+                        running = true;
+                        rafId = requestAnimationFrame(animate);
+                    }
+                };
+
+                window.addEventListener("scroll", onScroll, { passive: true });
+                document.documentElement.setAttribute(
+                    "data-banner-parallax-active",
+                    "true",
+                );
+
+                cleanup = () => {
+                    window.removeEventListener("scroll", onScroll);
+                    cancelAnimationFrame(rafId);
+                    document.documentElement.removeAttribute(
+                        "data-banner-parallax-active",
+                    );
+                };
+            };
+
+            init();
+            document.addEventListener("astro:page-load", init);
+            document.addEventListener("astro:before-swap", () => {
+                if (cleanup) {
+                    cleanup();
+                    cleanup = null;
                 }
+            });
+        })();
+    </script>
 
-                current = 0;
-                velocity = 0;
-                target = 0;
-                render(0);
-                running = false;
-            };
-
-            const onScroll = () => {
-                const y = window.scrollY;
-                const delta = y - lastScrollY;
-                lastScrollY = y;
-
-                target = clamp(target + delta * scrollFactor, -maxOffset, maxOffset);
-
-                if (!running) {
-                    running = true;
-                    rafId = requestAnimationFrame(animate);
-                }
-            };
-
-            window.addEventListener("scroll", onScroll, { passive: true });
-            document.documentElement.setAttribute("data-banner-parallax-active", "true");
-
-            cleanup = () => {
-                window.removeEventListener("scroll", onScroll);
-                cancelAnimationFrame(rafId);
-                document.documentElement.removeAttribute("data-banner-parallax-active");
-            };
-        };
-
-        init();
-        document.addEventListener("astro:page-load", init);
-        document.addEventListener("astro:before-swap", () => {
-            if (cleanup) {
-                cleanup();
-                cleanup = null;
-            }
-        });
-    })();
-</script>
-
-<script is:inline>
-    (() => {
-        let typingTimer = null;
-        let cursorTimer = null;
-        const TYPED_FLAG_KEY = "bannerWelcomeTyped";
-
-        const escapeHtml = (value) =>
-            value
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/\"/g, "&quot;")
-                .replace(/'/g, "&#039;");
-
-        const renderWaveText = (el, typed, withCursor) => {
-            const waveDurationAttr = Number(el.getAttribute("data-wave-duration-ms"));
-            const waveDurationMs = Number.isFinite(waveDurationAttr) && waveDurationAttr > 0 ? waveDurationAttr : 2600;
-            const nowMs = Date.now();
-
-            const chars = [...typed]
-                .map((char, i) => {
-                    const safeChar = char === " " ? "&nbsp;" : escapeHtml(char);
-                    const delayMs = -((nowMs + i * 90) % waveDurationMs);
-                    return `<span class="banner-welcome-wave-char" style="--wave-index:${i};animation-delay:${delayMs}ms">${safeChar}</span>`;
-                })
-                .join("");
-
-            const cursor = withCursor ? `<span class="banner-welcome-caret">_</span>` : "";
-            el.innerHTML = chars + cursor;
-        };
-
-        const isAlreadyTyped = () => {
-            try {
-                return window.sessionStorage.getItem(TYPED_FLAG_KEY) === "1";
-            } catch {
-                return window.__bannerWelcomeTyped === true;
-            }
-        };
-
-        const setTypedFlag = () => {
-            try {
-                window.sessionStorage.setItem(TYPED_FLAG_KEY, "1");
-            } catch {
-                window.__bannerWelcomeTyped = true;
-            }
-        };
-
-        const showFinalText = (textEl, fullText) => {
-            textEl.classList.remove("opacity-0");
-            renderWaveText(textEl, fullText, false);
-        };
-
-        const typeBannerWelcome = () => {
-            const textEl = document.getElementById("banner-welcome-text");
-            if (!textEl) return;
-
-            if (typingTimer) {
-                window.clearInterval(typingTimer);
-                typingTimer = null;
-            }
-            if (cursorTimer) {
-                window.clearInterval(cursorTimer);
-                cursorTimer = null;
-            }
-
-            const fullText = textEl.getAttribute("data-full-text") || "Welcome";
-            const typingSpeedAttr = Number(textEl.getAttribute("data-typing-speed"));
-            const typingSpeed = Number.isFinite(typingSpeedAttr) && typingSpeedAttr > 0 ? typingSpeedAttr : 120;
-
-            if (isAlreadyTyped()) {
-                showFinalText(textEl, fullText);
+    <script is:inline>
+        (() => {
+            const stateKey = "__bannerWelcomeTypeState";
+            const existingState = window[stateKey];
+            if (existingState?.initialized) {
+                existingState.bindFromDom();
+                document.addEventListener(
+                    "astro:page-load",
+                    existingState.bindFromDom,
+                );
                 return;
             }
 
-            textEl.classList.remove("opacity-0");
+            const state = {
+                initialized: true,
+                textEl: null,
+                texts: ["Welcome"],
+                typingSpeed: 120,
+                deletingSpeed: 84,
+                holdAfterTypedMs: 1000,
+                holdAfterDeletedMs: 280,
+                cursorVisible: true,
+                textIndex: 0,
+                charIndex: 0,
+                isDeleting: false,
+                typeTimer: null,
+                pauseTimer: null,
+                cursorTimer: null,
+                bindFromDom: () => {},
+                render: () => {},
+                step: () => {},
+                start: () => {},
+                clearTimers: () => {},
+            };
+            window[stateKey] = state;
 
-            let index = 0;
-            let cursorVisible = true;
+            const clearTimers = () => {
+                if (state.typeTimer) {
+                    window.clearTimeout(state.typeTimer);
+                    state.typeTimer = null;
+                }
+                if (state.pauseTimer) {
+                    window.clearTimeout(state.pauseTimer);
+                    state.pauseTimer = null;
+                }
+                if (state.cursorTimer) {
+                    window.clearInterval(state.cursorTimer);
+                    state.cursorTimer = null;
+                }
+            };
+            state.clearTimers = clearTimers;
 
-            const render = () => {
-                const typed = fullText.slice(0, index);
-                renderWaveText(textEl, typed, cursorVisible && index < fullText.length);
+            const escapeHtml = (value) =>
+                value
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/\"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+
+            const renderWaveText = (el, typed, withCursor) => {
+                const waveDurationAttr = Number(
+                    el.getAttribute("data-wave-duration-ms"),
+                );
+                const waveDurationMs =
+                    Number.isFinite(waveDurationAttr) && waveDurationAttr > 0
+                        ? waveDurationAttr
+                        : 2600;
+                const nowMs = Date.now();
+
+                const chars = [...typed]
+                    .map((char, i) => {
+                        const safeChar =
+                            char === " " ? "&nbsp;" : escapeHtml(char);
+                        const delayMs = -((nowMs + i * 90) % waveDurationMs);
+                        return `<span class="banner-welcome-wave-char" style="--wave-index:${i};animation-delay:${delayMs}ms">${safeChar}</span>`;
+                    })
+                    .join("");
+
+                const cursor = withCursor
+                    ? `<span class="banner-welcome-caret">_</span>`
+                    : "";
+                el.innerHTML = chars + cursor;
             };
 
-            render();
+            const parseTexts = (textEl) => {
+                const raw = textEl.getAttribute("data-full-texts");
+                if (!raw) return ["Welcome"];
 
-            cursorTimer = window.setInterval(() => {
-                cursorVisible = !cursorVisible;
-                render();
-            }, 420);
+                try {
+                    const parsed = JSON.parse(raw);
+                    if (!Array.isArray(parsed)) return ["Welcome"];
 
-            typingTimer = window.setInterval(() => {
-                index += 1;
-                render();
+                    const texts = parsed
+                        .filter((item) => typeof item === "string")
+                        .map((item) => item.trim())
+                        .filter((item) => item.length > 0);
 
-                if (index >= fullText.length) {
-                    window.clearInterval(typingTimer);
-                    typingTimer = null;
-                    if (cursorTimer) {
-                        window.clearInterval(cursorTimer);
-                        cursorTimer = null;
-                    }
-                    showFinalText(textEl, fullText);
-                    setTypedFlag();
+                    return texts.length > 0 ? texts : ["Welcome"];
+                } catch {
+                    return ["Welcome"];
                 }
-            }, typingSpeed);
-        };
+            };
 
-        window.addEventListener("load", () => {
-            window.setTimeout(typeBannerWelcome, 120);
-        });
+            const bindFromDom = () => {
+                const textEl = document.getElementById("banner-welcome-text");
+                if (!textEl) return;
 
-        document.addEventListener("astro:page-load", typeBannerWelcome);
-    })();
-</script>
+                const texts = parseTexts(textEl);
+                const typingSpeedAttr = Number(
+                    textEl.getAttribute("data-typing-speed"),
+                );
+                const typingSpeed =
+                    Number.isFinite(typingSpeedAttr) && typingSpeedAttr > 0
+                        ? typingSpeedAttr
+                        : 120;
+                const deletingSpeed = Math.max(
+                    45,
+                    Math.floor(typingSpeed * 0.7),
+                );
+                const holdAfterTypedAttr = Number(
+                    textEl.getAttribute("data-hold-after-typed-ms"),
+                );
+                const holdAfterTypedMs =
+                    Number.isFinite(holdAfterTypedAttr) &&
+                    holdAfterTypedAttr >= 0
+                        ? holdAfterTypedAttr
+                        : 1000;
+                const holdAfterDeletedAttr = Number(
+                    textEl.getAttribute("data-hold-after-deleted-ms"),
+                );
+                const holdAfterDeletedMs =
+                    Number.isFinite(holdAfterDeletedAttr) &&
+                    holdAfterDeletedAttr >= 0
+                        ? holdAfterDeletedAttr
+                        : 280;
 
-<script is:inline>
-    (() => {
-        let cleanups = [];
+                state.textEl = textEl;
+                state.texts = texts.length > 0 ? texts : ["Welcome"];
+                state.typingSpeed = typingSpeed;
+                state.deletingSpeed = deletingSpeed;
+                state.holdAfterTypedMs = holdAfterTypedMs;
+                state.holdAfterDeletedMs = holdAfterDeletedMs;
+                state.textIndex = state.textIndex % state.texts.length;
 
-        const initCardTilt = () => {
-            cleanups.forEach((fn) => fn());
-            cleanups = [];
+                textEl.classList.remove("opacity-0");
+                state.render();
+            };
+            state.bindFromDom = bindFromDom;
 
-            const cards = Array.from(document.querySelectorAll(".card-base"));
-            if (cards.length === 0) return;
+            const render = () => {
+                if (!state.textEl) return;
+                const currentText = state.texts[state.textIndex] ?? "";
+                const typed = currentText.slice(0, state.charIndex);
+                renderWaveText(state.textEl, typed, state.cursorVisible);
+            };
+            state.render = render;
 
-            const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
-            const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-            if (coarsePointer || reduceMotion) return;
+            const step = () => {
+                const currentText = state.texts[state.textIndex] ?? "";
 
-            const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
-
-            for (const card of cards) {
-                let rafId = 0;
-                let currentX = 0;
-                let currentY = 0;
-                let targetX = 0;
-                let targetY = 0;
-                let pointerXPercent = 50;
-                let pointerYPercent = 50;
-
-                const rect = card.getBoundingClientRect();
-                const area = rect.width * rect.height;
-                const isLargePanel = rect.width >= 1000 || rect.height >= 1000 || area >= 300000;
-
-                const maxRotate = isLargePanel ? 2.5 : 12;
-                const enterBoost = isLargePanel ? 0.88 : 1.2;
-                const smoothing = isLargePanel ? 0.11 : 0.14;
-
-                card.style.setProperty("--tilt-lift-active", isLargePanel ? "4px" : "14px");
-                card.style.setProperty("--tilt-scale-active", isLargePanel ? "1.001" : "1.016");
-                card.style.setProperty("--tilt-glow-active", isLargePanel ? "0.1" : "0.5");
-
-                const render = () => {
-                    currentX += (targetX - currentX) * smoothing;
-                    currentY += (targetY - currentY) * smoothing;
-
-                    card.style.setProperty("--tilt-rotate-x", `${currentX.toFixed(2)}deg`);
-                    card.style.setProperty("--tilt-rotate-y", `${currentY.toFixed(2)}deg`);
-                    card.style.setProperty("--tilt-pointer-x", `${pointerXPercent.toFixed(2)}%`);
-                    card.style.setProperty("--tilt-pointer-y", `${pointerYPercent.toFixed(2)}%`);
-
-                    if (Math.abs(targetX - currentX) > 0.03 || Math.abs(targetY - currentY) > 0.03) {
-                        rafId = window.requestAnimationFrame(render);
-                    } else {
-                        rafId = 0;
+                if (!state.isDeleting) {
+                    if (state.charIndex < currentText.length) {
+                        state.charIndex += 1;
+                        render();
+                        state.typeTimer = window.setTimeout(
+                            step,
+                            state.typingSpeed,
+                        );
+                        return;
                     }
-                };
 
-                const run = () => {
-                    if (!rafId) {
-                        rafId = window.requestAnimationFrame(render);
+                    state.pauseTimer = window.setTimeout(() => {
+                        state.isDeleting = true;
+                        step();
+                    }, state.holdAfterTypedMs);
+                    return;
+                }
+
+                if (state.charIndex > 0) {
+                    state.charIndex -= 1;
+                    render();
+                    state.typeTimer = window.setTimeout(
+                        step,
+                        state.deletingSpeed,
+                    );
+                    return;
+                }
+
+                state.textIndex = (state.textIndex + 1) % state.texts.length;
+                state.isDeleting = false;
+                state.pauseTimer = window.setTimeout(
+                    step,
+                    state.holdAfterDeletedMs,
+                );
+            };
+            state.step = step;
+
+            const start = () => {
+                clearTimers();
+                state.cursorTimer = window.setInterval(() => {
+                    state.cursorVisible = !state.cursorVisible;
+                    render();
+                }, 420);
+
+                render();
+                state.typeTimer = window.setTimeout(step, state.typingSpeed);
+            };
+            state.start = start;
+
+            window.addEventListener("load", () => {
+                window.setTimeout(() => {
+                    bindFromDom();
+                    start();
+                }, 120);
+            });
+
+            document.addEventListener("astro:page-load", bindFromDom);
+        })();
+    </script>
+
+    <script is:inline>
+        (() => {
+            let cleanups = [];
+            let observer = null;
+            let pendingInitTimer = 0;
+
+            const scheduleInitCardTilt = () => {
+                if (pendingInitTimer) {
+                    window.clearTimeout(pendingInitTimer);
+                }
+                pendingInitTimer = window.setTimeout(() => {
+                    pendingInitTimer = 0;
+                    initCardTilt();
+                }, 40);
+            };
+
+            const initCardTilt = () => {
+                cleanups.forEach((fn) => fn());
+                cleanups = [];
+
+                const cards = Array.from(
+                    document.querySelectorAll(".card-base"),
+                );
+                if (cards.length === 0) return;
+
+                const coarsePointer =
+                    window.matchMedia("(pointer: coarse)").matches;
+                const reduceMotion = window.matchMedia(
+                    "(prefers-reduced-motion: reduce)",
+                ).matches;
+                if (coarsePointer || reduceMotion) return;
+
+                const clamp = (value, min, max) =>
+                    Math.max(min, Math.min(max, value));
+
+                for (const card of cards) {
+                    let rafId = 0;
+                    let currentX = 0;
+                    let currentY = 0;
+                    let targetX = 0;
+                    let targetY = 0;
+                    let pointerXPercent = 50;
+                    let pointerYPercent = 50;
+
+                    const computeTiltProfile = () => {
+                        const rect = card.getBoundingClientRect();
+                        const width = rect.width;
+                        const height = rect.height;
+                        const area = width * height;
+                        const aspect = height / Math.max(width, 1);
+
+                        // 超长内容面板（例如文章正文）不启用 3D 旋转
+                        const isVeryTallPanel = height >= 900 && aspect >= 1.6;
+                        const isExtremelyTallPanel = height >= 1400;
+                        const disabled =
+                            isVeryTallPanel || isExtremelyTallPanel;
+
+                        if (disabled) {
+                            return {
+                                disabled: true,
+                                isLargePanel: true,
+                                maxRotate: 0,
+                                enterBoost: 1,
+                                smoothing: 0.12,
+                                lift: "0px",
+                                scale: "1",
+                                glow: "0",
+                            };
+                        }
+
+                        // 根据尺寸连续缩放，而不是粗略分组
+                        // 尺寸越大，旋转越弱；尺寸越小，旋转更明显
+                        const sizeFactor = clamp(
+                            Math.min(width, height) / 620,
+                            0,
+                            1,
+                        );
+                        const areaFactor = clamp(area / 260000, 0, 1);
+                        const damp = Math.max(sizeFactor, areaFactor);
+
+                        const maxRotate = 12 - damp * 9.4; // 约 12deg -> 2.6deg
+                        const enterBoost = 1.2 - damp * 0.32;
+                        const smoothing = 0.14 - damp * 0.03;
+                        const liftPx = 14 - damp * 10;
+                        const scaleValue = 1.016 - damp * 0.015;
+                        const glowValue = 0.5 - damp * 0.38;
+                        const isLargePanel = damp >= 0.6;
+
+                        return {
+                            disabled: false,
+                            isLargePanel,
+                            maxRotate,
+                            enterBoost,
+                            smoothing,
+                            lift: `${liftPx.toFixed(2)}px`,
+                            scale: scaleValue.toFixed(4),
+                            glow: glowValue.toFixed(3),
+                        };
+                    };
+
+                    let maxRotate = 0;
+                    let enterBoost = 1;
+                    let smoothing = 0.12;
+                    let isLargePanel = false;
+                    let tiltDisabled = false;
+
+                    const applyProfile = () => {
+                        const profile = computeTiltProfile();
+                        maxRotate = profile.maxRotate;
+                        enterBoost = profile.enterBoost;
+                        smoothing = profile.smoothing;
+                        isLargePanel = profile.isLargePanel;
+                        tiltDisabled = profile.disabled;
+
+                        card.style.setProperty(
+                            "--tilt-lift-active",
+                            profile.lift,
+                        );
+                        card.style.setProperty(
+                            "--tilt-scale-active",
+                            profile.scale,
+                        );
+                        card.style.setProperty(
+                            "--tilt-glow-active",
+                            profile.glow,
+                        );
+
+                        if (tiltDisabled) {
+                            card.classList.remove("is-tilting");
+                            card.classList.remove("is-tilting-large");
+                        }
+                    };
+
+                    applyProfile();
+
+                    const render = () => {
+                        currentX += (targetX - currentX) * smoothing;
+                        currentY += (targetY - currentY) * smoothing;
+
+                        card.style.setProperty(
+                            "--tilt-rotate-x",
+                            `${currentX.toFixed(2)}deg`,
+                        );
+                        card.style.setProperty(
+                            "--tilt-rotate-y",
+                            `${currentY.toFixed(2)}deg`,
+                        );
+                        card.style.setProperty(
+                            "--tilt-pointer-x",
+                            `${pointerXPercent.toFixed(2)}%`,
+                        );
+                        card.style.setProperty(
+                            "--tilt-pointer-y",
+                            `${pointerYPercent.toFixed(2)}%`,
+                        );
+
+                        if (
+                            Math.abs(targetX - currentX) > 0.03 ||
+                            Math.abs(targetY - currentY) > 0.03
+                        ) {
+                            rafId = window.requestAnimationFrame(render);
+                        } else {
+                            rafId = 0;
+                        }
+                    };
+
+                    const run = () => {
+                        if (!rafId) {
+                            rafId = window.requestAnimationFrame(render);
+                        }
+                    };
+
+                    const onPointerMove = (event) => {
+                        if (tiltDisabled) return;
+
+                        const rect = card.getBoundingClientRect();
+                        const x = clamp(
+                            (event.clientX - rect.left) / rect.width,
+                            0,
+                            1,
+                        );
+                        const y = clamp(
+                            (event.clientY - rect.top) / rect.height,
+                            0,
+                            1,
+                        );
+
+                        pointerXPercent = x * 100;
+                        pointerYPercent = y * 100;
+
+                        targetX = (0.5 - y) * maxRotate * enterBoost;
+                        targetY = (x - 0.5) * maxRotate * enterBoost;
+
+                        run();
+                    };
+
+                    const onPointerEnter = (event) => {
+                        applyProfile();
+                        if (tiltDisabled) return;
+
+                        card.classList.add("is-tilting");
+                        card.classList.toggle("is-tilting-large", isLargePanel);
+                        onPointerMove(event);
+                    };
+
+                    const reset = () => {
+                        targetX = 0;
+                        targetY = 0;
+                        pointerXPercent = 50;
+                        pointerYPercent = 50;
+                        card.classList.remove("is-tilting");
+                        card.classList.remove("is-tilting-large");
+                        run();
+                    };
+
+                    const onResize = () => {
+                        applyProfile();
+                        if (tiltDisabled) {
+                            reset();
+                        }
+                    };
+
+                    card.addEventListener("pointerenter", onPointerEnter);
+                    card.addEventListener("pointermove", onPointerMove);
+                    card.addEventListener("pointerleave", reset);
+                    card.addEventListener("pointercancel", reset);
+                    window.addEventListener("resize", onResize, {
+                        passive: true,
+                    });
+
+                    cleanups.push(() => {
+                        card.removeEventListener(
+                            "pointerenter",
+                            onPointerEnter,
+                        );
+                        card.removeEventListener("pointermove", onPointerMove);
+                        card.removeEventListener("pointerleave", reset);
+                        card.removeEventListener("pointercancel", reset);
+                        window.removeEventListener("resize", onResize);
+                        if (rafId) {
+                            window.cancelAnimationFrame(rafId);
+                            rafId = 0;
+                        }
+                        card.classList.remove("is-tilting");
+                        card.classList.remove("is-tilting-large");
+                        card.style.removeProperty("--tilt-rotate-x");
+                        card.style.removeProperty("--tilt-rotate-y");
+                        card.style.removeProperty("--tilt-pointer-x");
+                        card.style.removeProperty("--tilt-pointer-y");
+                        card.style.removeProperty("--tilt-lift-active");
+                        card.style.removeProperty("--tilt-scale-active");
+                        card.style.removeProperty("--tilt-glow-active");
+                    });
+                }
+            };
+
+            initCardTilt();
+            document.addEventListener("astro:page-load", scheduleInitCardTilt);
+
+            observer = new MutationObserver((mutations) => {
+                for (const mutation of mutations) {
+                    for (const node of mutation.addedNodes) {
+                        if (!(node instanceof HTMLElement)) continue;
+                        if (
+                            node.classList?.contains("card-base") ||
+                            node.querySelector?.(".card-base")
+                        ) {
+                            scheduleInitCardTilt();
+                            return;
+                        }
                     }
-                };
+                }
+            });
 
-                const onPointerMove = (event) => {
-                    const rect = card.getBoundingClientRect();
-                    const x = clamp((event.clientX - rect.left) / rect.width, 0, 1);
-                    const y = clamp((event.clientY - rect.top) / rect.height, 0, 1);
+            observer.observe(document.body, { childList: true, subtree: true });
 
-                    pointerXPercent = x * 100;
-                    pointerYPercent = y * 100;
+            document.addEventListener("astro:before-swap", () => {
+                cleanups.forEach((fn) => fn());
+                cleanups = [];
+                if (pendingInitTimer) {
+                    window.clearTimeout(pendingInitTimer);
+                    pendingInitTimer = 0;
+                }
+            });
 
-                    targetX = (0.5 - y) * maxRotate * enterBoost;
-                    targetY = (x - 0.5) * maxRotate * enterBoost;
-
-                    run();
-                };
-
-                const onPointerEnter = (event) => {
-                    card.classList.add("is-tilting");
-                    card.classList.toggle("is-tilting-large", isLargePanel);
-                    onPointerMove(event);
-                };
-
-                const reset = () => {
-                    targetX = 0;
-                    targetY = 0;
-                    pointerXPercent = 50;
-                    pointerYPercent = 50;
-                    card.classList.remove("is-tilting");
-                    card.classList.remove("is-tilting-large");
-                    run();
-                };
-
-                card.addEventListener("pointerenter", onPointerEnter);
-                card.addEventListener("pointermove", onPointerMove);
-                card.addEventListener("pointerleave", reset);
-                card.addEventListener("pointercancel", reset);
-
-                cleanups.push(() => {
-                    card.removeEventListener("pointerenter", onPointerEnter);
-                    card.removeEventListener("pointermove", onPointerMove);
-                    card.removeEventListener("pointerleave", reset);
-                    card.removeEventListener("pointercancel", reset);
-                    if (rafId) {
-                        window.cancelAnimationFrame(rafId);
-                        rafId = 0;
-                    }
-                    card.classList.remove("is-tilting");
-                    card.classList.remove("is-tilting-large");
-                    card.style.removeProperty("--tilt-rotate-x");
-                    card.style.removeProperty("--tilt-rotate-y");
-                    card.style.removeProperty("--tilt-pointer-x");
-                    card.style.removeProperty("--tilt-pointer-y");
-                    card.style.removeProperty("--tilt-lift-active");
-                    card.style.removeProperty("--tilt-scale-active");
-                    card.style.removeProperty("--tilt-glow-active");
-                });
-            }
-        };
-
-        initCardTilt();
-        document.addEventListener("astro:page-load", initCardTilt);
-        document.addEventListener("astro:before-swap", () => {
-            cleanups.forEach((fn) => fn());
-            cleanups = [];
-        });
-    })();
-</script>
+            window.addEventListener("beforeunload", () => {
+                cleanups.forEach((fn) => fn());
+                cleanups = [];
+                if (observer) {
+                    observer.disconnect();
+                    observer = null;
+                }
+                if (pendingInitTimer) {
+                    window.clearTimeout(pendingInitTimer);
+                    pendingInitTimer = 0;
+                }
+            });
+        })();
+    </script>
 </Layout>

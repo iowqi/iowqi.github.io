@@ -26,8 +26,10 @@ export type SiteConfig = {
 		position?: "top" | "center" | "bottom";
 		welcomeText?: {
 			enable: boolean;
-			content: string;
+			content: string | string[];
 			typingSpeed?: number;
+			holdAfterTypedMs?: number;
+			holdAfterDeletedMs?: number;
 			fontFamily?: string;
 			fontWeight?: number;
 			fontSizeMobileRem?: number;
@@ -62,6 +64,7 @@ export type SiteConfig = {
 	backgroundPattern?: {
 		enable: boolean;
 		density: number; // 0.4 ~ 2.5, controls polygon count
+		particleDensity?: number; // 0.3 ~ 3.5, controls tiny particle & streak count
 		strokeAlpha: number; // 0.03 ~ 0.45
 		topSafeZoneRatio: number; // 0.15 ~ 0.75, relative to viewport height
 		seed?: string; // fixed seed; undefined means device/session based seed

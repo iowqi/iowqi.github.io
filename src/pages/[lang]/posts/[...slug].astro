@@ -1,0 +1,21 @@
+---
+import PostsSlugPageContent from "@components/pages/PostsSlugPageContent.astro";
+import { supportedLanguages } from "@i18n/translation";
+import { getSortedPosts } from "@utils/content-utils";
+import { setupI18nLangFromValue } from "@utils/i18n-route-utils";
+
+export async function getStaticPaths() {
+	const blogEntries = await getSortedPosts();
+	return supportedLanguages.flatMap((lang) =>
+		blogEntries.map((entry) => ({
+			params: { lang, slug: entry.slug },
+			props: { entry, lang },
+		})),
+	);
+}
+
+const { entry, lang: langProp } = Astro.props;
+const lang = setupI18nLangFromValue((langProp as string) || Astro.params.lang || "en");
+---
+
+<PostsSlugPageContent entry={entry} lang={lang} />

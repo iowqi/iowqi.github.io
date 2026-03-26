@@ -1,0 +1,16 @@
+---
+import type { GetStaticPaths } from "astro";
+import ArchivePageContent from "@components/pages/ArchivePageContent.astro";
+import {
+	getLangStaticPaths,
+	setupI18nLangFromAstro,
+} from "@utils/i18n-route-utils";
+
+export const getStaticPaths = (async () => {
+	return getLangStaticPaths();
+}) satisfies GetStaticPaths;
+
+const lang = setupI18nLangFromAstro(Astro);
+---
+
+<ArchivePageContent lang={lang} />
