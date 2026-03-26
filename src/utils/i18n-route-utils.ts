@@ -1,6 +1,10 @@
+import {
+	normalizeLang,
+	setI18nLang,
+	supportedLanguages,
+} from "@i18n/translation";
 import type { APIContext } from "astro";
 import type { SiteConfig } from "src/types/config";
-import { normalizeLang, setI18nLang, supportedLanguages } from "@i18n/translation";
 
 export function getLangStaticPaths() {
 	return supportedLanguages.map((lang) => ({ params: { lang } }));

@@ -1,5 +1,5 @@
-import { siteConfig } from "../config";
 import type { SiteConfig } from "@/types/config";
+import { siteConfig } from "../config";
 import type I18nKey from "./i18nKey";
 import { en } from "./languages/en";
 import { es } from "./languages/es";
@@ -62,7 +62,9 @@ export function normalizeLang(input?: string | null): SiteConfig["lang"] {
 	return found || siteConfig.lang;
 }
 
-export function extractLangFromPath(pathname: string): SiteConfig["lang"] | null {
+export function extractLangFromPath(
+	pathname: string,
+): SiteConfig["lang"] | null {
 	const firstSegment = pathname.replace(/^\/+/, "").split("/")[0];
 	if (!firstSegment) {
 		return null;

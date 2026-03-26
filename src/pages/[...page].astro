@@ -1,8 +1,8 @@
 ---
-import type { GetStaticPaths } from "astro";
 import PaginatedPostsPageContent from "@components/pages/PaginatedPostsPageContent.astro";
 import { PAGE_SIZE } from "@constants/constants";
 import { getSortedPosts } from "@utils/content-utils";
+import type { GetStaticPaths } from "astro";
 
 export const getStaticPaths = (async ({ paginate }) => {
 	const allBlogPosts = await getSortedPosts();

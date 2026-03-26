@@ -1,10 +1,10 @@
 ---
-import type { GetStaticPaths } from "astro";
 import AboutPageContent from "@components/pages/AboutPageContent.astro";
 import {
 	getLangStaticPaths,
 	setupI18nLangFromAstro,
 } from "@utils/i18n-route-utils";
+import type { GetStaticPaths } from "astro";
 
 export const getStaticPaths = (async () => {
 	return getLangStaticPaths();

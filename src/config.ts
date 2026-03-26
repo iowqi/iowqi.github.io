@@ -21,11 +21,17 @@ export const siteConfig: SiteConfig = {
 		position: "center", // Equivalent to object-position, only supports 'top', 'center', 'bottom'. 'center' by default
 		welcomeText: {
 			enable: true, // Display welcome text on top of banner
-			content: ["Hello there👋, welcome!", "欢迎光临OwO", "Have a nice day!🌞", "陌生人，坐下来喝杯茶吧🍵"], // Texts displayed in the banner typing loop
+			content: [
+				"Hello there👋, welcome!",
+				"欢迎光临OwO",
+				"Have a nice day!🌞",
+				"陌生人，坐下来喝杯茶吧🍵",
+			], // Texts displayed in the banner typing loop
 			typingSpeed: 120, // Milliseconds per character
 			holdAfterTypedMs: 1000, // Wait after each string is fully typed
 			holdAfterDeletedMs: 280, // Wait after each string is fully deleted
-			fontFamily: "\"Space Grotesk\", \"Segoe UI\", \"Inter\", system-ui, -apple-system, sans-serif", // CSS font-family for banner welcome text
+			fontFamily:
+				'"Space Grotesk", "Segoe UI", "Inter", system-ui, -apple-system, sans-serif', // CSS font-family for banner welcome text
 			fontWeight: 800, // 600~900 recommended
 			fontSizeMobileRem: 3, // Mobile font size (rem)
 			fontSizeDesktopRem: 4.5, // Desktop font size (rem)

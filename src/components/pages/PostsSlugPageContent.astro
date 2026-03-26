@@ -1,9 +1,6 @@
 ---
-import path from "node:path";
-
-import { Icon } from "astro-icon/components";
 import type { CollectionEntry } from "astro:content";
-
+import path from "node:path";
 import ImageWrapper from "@components/misc/ImageWrapper.astro";
 import License from "@components/misc/License.astro";
 import Markdown from "@components/misc/Markdown.astro";
@@ -13,6 +10,7 @@ import { i18n } from "@i18n/translation";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
 import { formatDateToYYYYMMDD } from "@utils/date-utils";
 import { getDir, getPostUrlBySlug } from "@utils/url-utils";
+import { Icon } from "astro-icon/components";
 import { licenseConfig, profileConfig, siteConfig } from "src/config";
 
 interface Props {

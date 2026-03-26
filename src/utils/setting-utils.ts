@@ -66,7 +66,9 @@ export function getDefaultLang(): SiteConfig["lang"] {
 }
 
 export function getLang(): SiteConfig["lang"] {
-	return (localStorage.getItem("lang") as SiteConfig["lang"]) || getDefaultLang();
+	return (
+		(localStorage.getItem("lang") as SiteConfig["lang"]) || getDefaultLang()
+	);
 }
 
 export function setLang(lang: SiteConfig["lang"]): void {

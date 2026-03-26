@@ -1,10 +1,9 @@
 ---
-import type { Page } from "astro";
 import type { CollectionEntry } from "astro:content";
-
 import Pagination from "@components/control/Pagination.astro";
 import PostPage from "@components/PostPage.astro";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
+import type { Page } from "astro";
 
 interface Props {
 	page: Page<CollectionEntry<"posts">>;

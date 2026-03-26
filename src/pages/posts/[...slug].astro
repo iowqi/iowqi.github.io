@@ -3,11 +3,11 @@ import PostsSlugPageContent from "@components/pages/PostsSlugPageContent.astro";
 import { getSortedPosts } from "@utils/content-utils";
 
 export async function getStaticPaths() {
-    const blogEntries = await getSortedPosts();
-    return blogEntries.map((entry) => ({
-        params: { slug: entry.slug },
-        props: { entry },
-    }));
+	const blogEntries = await getSortedPosts();
+	return blogEntries.map((entry) => ({
+		params: { slug: entry.slug },
+		props: { entry },
+	}));
 }
 
 const { entry } = Astro.props;

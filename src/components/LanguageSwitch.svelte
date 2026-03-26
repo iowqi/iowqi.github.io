@@ -1,8 +1,8 @@
 <script lang="ts">
-import Icon from "@iconify/svelte";
 import { getCurrentLang } from "@i18n/translation";
-import { localizePath } from "@utils/url-utils";
+import Icon from "@iconify/svelte";
 import { setLang } from "@utils/setting-utils";
+import { localizePath } from "@utils/url-utils";
 import { onMount } from "svelte";
 import type { SiteConfig } from "@/types/config";
 
@@ -37,7 +37,10 @@ function switchLang(lang: SiteConfig["lang"]) {
 	}
 	currentLang = lang;
 	setLang(lang);
-	const nextPath = localizePath(window.location.pathname + window.location.search + window.location.hash, lang);
+	const nextPath = localizePath(
+		window.location.pathname + window.location.search + window.location.hash,
+		lang,
+	);
 	window.location.href = nextPath;
 }
 

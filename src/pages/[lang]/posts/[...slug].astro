@@ -15,7 +15,9 @@ export async function getStaticPaths() {
 }
 
 const { entry, lang: langProp } = Astro.props;
-const lang = setupI18nLangFromValue((langProp as string) || Astro.params.lang || "en");
+const lang = setupI18nLangFromValue(
+	(langProp as string) || Astro.params.lang || "en",
+);
 ---
 
 <PostsSlugPageContent entry={entry} lang={lang} />

@@ -1,10 +1,10 @@
 ---
-import type { GetStaticPaths } from "astro";
 import PaginatedPostsPageContent from "@components/pages/PaginatedPostsPageContent.astro";
 import { PAGE_SIZE } from "@constants/constants";
 import { supportedLanguages } from "@i18n/translation";
 import { getSortedPosts } from "@utils/content-utils";
 import { setupI18nLangFromAstro } from "@utils/i18n-route-utils";
+import type { GetStaticPaths } from "astro";
 
 export const getStaticPaths = (async ({ paginate }) => {
 	const allBlogPosts = await getSortedPosts();
