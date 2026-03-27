@@ -7,6 +7,10 @@ export function pathsEqual(path1: string, path2: string) {
 	return normalizedPath1 === normalizedPath2;
 }
 
+export function isHomePath(path: string): boolean {
+	return pathsEqual(stripLangPrefix(path), "/");
+}
+
 function joinUrl(...parts: string[]): string {
 	const joined = parts.join("/");
 	return joined.replace(/\/+/g, "/");
@@ -69,6 +73,11 @@ export function stripLangPrefix(path: string): string {
 		return `${base}${search}${hash}`;
 	}
 	return `${pathname}${search}${hash}`;
+}
+
+export function isLocalizedHomePath(path: string): boolean {
+	const normalizedPath = stripLangPrefix(path);
+	return pathsEqual(normalizedPath, "/");
 }
 
 export function localizePath(path: string, lang = getCurrentLang()): string {
