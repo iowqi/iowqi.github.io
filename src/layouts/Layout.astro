@@ -76,89 +76,133 @@ const bannerOffset =
 	bannerOffsetByPosition[siteConfig.banner.position || "center"];
 ---
 
-<!DOCTYPE html>
-<html lang={siteLang} class="bg-[var(--page-bg)] transition text-[14px] md:text-[16px]"
-	  data-overlayscrollbars-initialize
+<!doctype html>
+<html
+	lang={siteLang}
+	class="bg-[var(--page-bg)] transition text-[14px] md:text-[16px]"
+	data-overlayscrollbars-initialize
 >
 	<head>
-
 		<title>{pageTitle}</title>
 
 		<meta charset="UTF-8" />
-		<meta name="description" content={description || pageTitle}>
-		<meta name="author" content={profileConfig.name}>
+		<meta name="description" content={description || pageTitle} />
+		<meta name="author" content={profileConfig.name} />
 
-		<meta property="og:site_name" content={siteConfig.title}>
-		<meta property="og:url" content={Astro.url}>
-		<meta property="og:title" content={pageTitle}>
-		<meta property="og:description" content={description || pageTitle}>
-		{setOGTypeArticle ? (
-        <meta property="og:type" content="article" />
-        ) : (
-        <meta property="og:type" content="website" />
-        )}
+		<meta property="og:site_name" content={siteConfig.title} />
+		<meta property="og:url" content={Astro.url} />
+		<meta property="og:title" content={pageTitle} />
+		<meta property="og:description" content={description || pageTitle} />
+		{
+			setOGTypeArticle ? (
+				<meta property="og:type" content="article" />
+			) : (
+				<meta property="og:type" content="website" />
+			)
+		}
 
-		<meta name="twitter:card" content="summary_large_image">
-		<meta property="twitter:url" content={Astro.url}>
-		<meta name="twitter:title" content={pageTitle}>
-		<meta name="twitter:description" content={description || pageTitle}>
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta property="twitter:url" content={Astro.url} />
+		<meta name="twitter:title" content={pageTitle} />
+		<meta name="twitter:description" content={description || pageTitle} />
 
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
-		{favicons.map(favicon => (
-			<link rel="icon"
-				  href={favicon.src.startsWith('/') ? url(favicon.src) : favicon.src}
-				  sizes={favicon.sizes}
-				  media={favicon.theme && `(prefers-color-scheme: ${favicon.theme})`}
-			/>
-		))}
+		{
+			favicons.map((favicon) => (
+				<link
+					rel="icon"
+					href={
+						favicon.src.startsWith("/")
+							? url(favicon.src)
+							: favicon.src
+					}
+					sizes={favicon.sizes}
+					media={
+						favicon.theme &&
+						`(prefers-color-scheme: ${favicon.theme})`
+					}
+				/>
+			))
+		}
 
 		<!-- Set the theme before the page is rendered to avoid a flash -->
-		<script is:inline define:vars={{DEFAULT_THEME, LIGHT_MODE, DARK_MODE, AUTO_MODE, BANNER_HEIGHT_EXTEND, PAGE_WIDTH, configHue}}>
+		<script
+			is:inline
+			define:vars={{
+				DEFAULT_THEME,
+				LIGHT_MODE,
+				DARK_MODE,
+				AUTO_MODE,
+				BANNER_HEIGHT_EXTEND,
+				PAGE_WIDTH,
+				configHue,
+			}}
+		>
 			// Load the theme from local storage
-			const theme = localStorage.getItem('theme') || DEFAULT_THEME;
+			const theme = localStorage.getItem("theme") || DEFAULT_THEME;
 			switch (theme) {
 				case LIGHT_MODE:
-					document.documentElement.classList.remove('dark');
-					break
+					document.documentElement.classList.remove("dark");
+					break;
 				case DARK_MODE:
-					document.documentElement.classList.add('dark');
-					break
+					document.documentElement.classList.add("dark");
+					break;
 				case AUTO_MODE:
-					if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-						document.documentElement.classList.add('dark');
+					if (
+						window.matchMedia("(prefers-color-scheme: dark)")
+							.matches
+					) {
+						document.documentElement.classList.add("dark");
 					} else {
-						document.documentElement.classList.remove('dark');
+						document.documentElement.classList.remove("dark");
 					}
 			}
 
 			// Load the hue from local storage
-			const hue = localStorage.getItem('hue') || configHue;
-			document.documentElement.style.setProperty('--hue', hue);
+			const hue = localStorage.getItem("hue") || configHue;
+			document.documentElement.style.setProperty("--hue", hue);
 
 			// calculate the --banner-height-extend, which needs to be a multiple of 4 to avoid blurry text
-			let offset = Math.floor(window.innerHeight * (BANNER_HEIGHT_EXTEND / 100));
-			offset = offset - offset % 4;
-			document.documentElement.style.setProperty('--banner-height-extend', `${offset}px`);
+			let offset = Math.floor(
+				window.innerHeight * (BANNER_HEIGHT_EXTEND / 100),
+			);
+			offset = offset - (offset % 4);
+			document.documentElement.style.setProperty(
+				"--banner-height-extend",
+				`${offset}px`,
+			);
 		</script>
-		<style define:vars={{
-			configHue,
-			'page-width': `${PAGE_WIDTH}rem`,
-		}}></style>  <!-- defines global css variables. This will be applied to <html> <body> and some other elements idk why -->
+		<style
+			define:vars={{
+				configHue,
+				"page-width": `${PAGE_WIDTH}rem`,
+			}}
+		></style>
+		<!-- defines global css variables. This will be applied to <html> <body> and some other elements idk why -->
 
+		<slot name="head" />
 
-		<slot name="head"></slot>
-
-		<link rel="alternate" type="application/rss+xml" title={profileConfig.name} href={`${Astro.site}rss.xml`}/>
-
+		<link
+			rel="alternate"
+			type="application/rss+xml"
+			title={profileConfig.name}
+			href={`${Astro.site}rss.xml`}
+		/>
 	</head>
-	<body class=" min-h-screen transition " class:list={[{"lg:is-home": isHomePage, "enable-banner": enableBanner}]}
-		  data-overlayscrollbars-initialize
+	<body
+		class="min-h-screen transition"
+		class:list={[
+			{ "lg:is-home": isHomePage, "enable-banner": enableBanner },
+		]}
+		data-overlayscrollbars-initialize
 	>
 		<div id="generated-bg-pattern" aria-hidden="true">
-			<svg id="generated-bg-pattern-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+			<svg
+				id="generated-bg-pattern-svg"
+				xmlns="http://www.w3.org/2000/svg"></svg>
 		</div>
-		<ConfigCarrier></ConfigCarrier>
+		<ConfigCarrier />
 		<slot />
 
 		<!-- increase the page height during page transition to prevent the scrolling animation from jumping -->
@@ -166,92 +210,105 @@ const bannerOffset =
 	</body>
 </html>
 
-<style is:global define:vars={{
-	bannerOffset,
-	'banner-height-home': `${BANNER_HEIGHT_HOME}vh`,
-	'banner-height': `${BANNER_HEIGHT}vh`,
-}}>
-@tailwind components;
+<style
+	is:global
+	define:vars={{
+		bannerOffset,
+		"banner-height-home": `${BANNER_HEIGHT_HOME}vh`,
+		"banner-height": `${BANNER_HEIGHT}vh`,
+	}}
+>
+	@tailwind components;
 
-#generated-bg-pattern {
-	position: fixed;
-	inset: 0;
-	z-index: -1;
-	pointer-events: none;
-	overflow: hidden;
-	background: var(--page-bg);
-}
-
-#generated-bg-pattern-svg {
-	width: 100%;
-	height: 100%;
-	display: block;
-}
-
-@layer components {
-	.enable-banner.is-home #banner-wrapper {
-		@apply h-[var(--banner-height-home)] translate-y-[var(--banner-height-extend)]
-	}
-	.enable-banner #banner-wrapper {
-		@apply h-[var(--banner-height-home)]
+	#generated-bg-pattern {
+		position: fixed;
+		inset: 0;
+		z-index: -1;
+		pointer-events: none;
+		overflow: hidden;
+		background: var(--page-bg);
 	}
 
-	.enable-banner.is-home #banner {
-		@apply h-[var(--banner-height-home)] translate-y-0
+	#generated-bg-pattern-svg {
+		width: 100%;
+		height: 100%;
+		display: block;
 	}
-	.enable-banner #banner {
-		@apply h-[var(--banner-height-home)] translate-y-[var(--bannerOffset)]
+
+	@layer components {
+		.enable-banner.is-home #banner-wrapper {
+			@apply h-[var(--banner-height-home)] translate-y-[var(--banner-height-extend)];
+		}
+		.enable-banner #banner-wrapper {
+			@apply h-[var(--banner-height-home)];
+		}
+
+		.enable-banner.is-home #banner {
+			@apply h-[var(--banner-height-home)] translate-y-0;
+		}
+		.enable-banner #banner {
+			@apply h-[var(--banner-height-home)] translate-y-[var(--bannerOffset)];
+		}
+		.enable-banner.is-home #main-grid {
+			@apply translate-y-[var(--banner-height-extend)];
+		}
+		.enable-banner #top-row {
+			@apply h-[calc(var(--banner-height-home)_-_4.5rem)] transition-all duration-300;
+		}
+		.enable-banner.is-home #sidebar-sticky {
+			@apply top-[calc(1rem_-_var(--banner-height-extend))];
+		}
+		.navbar-hidden {
+			@apply opacity-0 -translate-y-16;
+		}
 	}
-	.enable-banner.is-home #main-grid {
-		@apply translate-y-[var(--banner-height-extend)];
-	}
-	.enable-banner #top-row {
-		@apply h-[calc(var(--banner-height-home)_-_4.5rem)] transition-all duration-300
-	}
-	.enable-banner.is-home #sidebar-sticky {
-		@apply top-[calc(1rem_-_var(--banner-height-extend))]
-	}
-	.navbar-hidden {
-		@apply opacity-0 -translate-y-16
-	}
-}
 </style>
 
 <script>
-import 'overlayscrollbars/overlayscrollbars.css';
-import {
-	OverlayScrollbars,
-	// ScrollbarsHidingPlugin,
-	// SizeObserverPlugin,
-	// ClickScrollPlugin
-} from 'overlayscrollbars';
-import {getHue, getStoredTheme, setHue, setTheme} from "../utils/setting-utils";
-import { isHomePath, pathsEqual, stripLangPrefix, url } from "../utils/url-utils";
-import {
-	BANNER_HEIGHT,
-	BANNER_HEIGHT_HOME,
-	BANNER_HEIGHT_EXTEND,
-	MAIN_PANEL_OVERLAPS_BANNER_HEIGHT
-} from "../constants/constants";
-import { siteConfig } from '../config';
+	import "overlayscrollbars/overlayscrollbars.css";
+	import {
+		OverlayScrollbars,
+		// ScrollbarsHidingPlugin,
+		// SizeObserverPlugin,
+		// ClickScrollPlugin
+	} from "overlayscrollbars";
+	import {
+		getHue,
+		getStoredTheme,
+		setHue,
+		setTheme,
+	} from "../utils/setting-utils";
+	import {
+		isHomePath,
+		pathsEqual,
+		stripLangPrefix,
+		url,
+	} from "../utils/url-utils";
+	import {
+		BANNER_HEIGHT,
+		BANNER_HEIGHT_HOME,
+		BANNER_HEIGHT_EXTEND,
+		MAIN_PANEL_OVERLAPS_BANNER_HEIGHT,
+	} from "../constants/constants";
+	import { siteConfig } from "../config";
 
-/* Preload fonts */
-// (async function() {
-// 	try {
-// 		await Promise.all([
-// 			document.fonts.load("400 1em Roboto"),
-// 			document.fonts.load("700 1em Roboto"),
-// 		]);
-// 		document.body.classList.remove("hidden");
-// 	} catch (error) {
-// 		console.log("Failed to load fonts:", error);
-// 	}
-// })();
+	/* Preload fonts */
+	// (async function() {
+	// 	try {
+	// 		await Promise.all([
+	// 			document.fonts.load("400 1em Roboto"),
+	// 			document.fonts.load("700 1em Roboto"),
+	// 		]);
+	// 		document.body.classList.remove("hidden");
+	// 	} catch (error) {
+	// 		console.log("Failed to load fonts:", error);
+	// 	}
+	// })();
 
-/* TODO This is a temporary solution for style flicker issue when the transition is activated */
-/* issue link: https://github.com/withastro/astro/issues/8711, the solution get from here too */
-/* update: fixed in Astro 3.2.4 */
-/*
+	/* TODO This is a temporary solution for style flicker issue when the transition is activated */
+	/* issue link: https://github.com/withastro/astro/issues/8711, the solution get from here too */
+	/* update: fixed in Astro 3.2.4 */
+	/*
 function disableAnimation() {
 	const css = document.createElement('style')
 	css.appendChild(
@@ -279,533 +336,662 @@ function disableAnimation() {
 }
 */
 
-const bannerEnabled = !!document.getElementById('banner-wrapper')
+	const bannerEnabled = !!document.getElementById("banner-wrapper");
 
-interface MovingPolygon {
-	el: SVGGElement;
-	glowEl: SVGPolygonElement;
-	x: number;
-	y: number;
-	radius: number;
-	vx: number;
-	vy: number;
-	ax: number;
-	ay: number;
-	angle: number;
-	angularVelocity: number;
-	angularAcceleration: number;
-	pulsePhase: number;
-	pulseSpeed: number;
-}
-
-interface FloatingFragment {
-	el: SVGCircleElement;
-	x: number;
-	y: number;
-	radius: number;
-	vx: number;
-	vy: number;
-	lifePhase: number;
-	lifeSpeed: number;
-}
-
-interface FloatingStreak {
-	el: SVGLineElement;
-	x: number;
-	y: number;
-	length: number;
-	vx: number;
-	vy: number;
-	angle: number;
-	lifePhase: number;
-	lifeSpeed: number;
-}
-
-let movingPolygons: MovingPolygon[] = [];
-let floatingFragments: FloatingFragment[] = [];
-let floatingStreaks: FloatingStreak[] = [];
-let bgAnimationFrameId: number | null = null;
-let lastAnimationTime = 0;
-
-function hashStringToSeed(input: string): number {
-	let hash = 2166136261;
-	for (let i = 0; i < input.length; i += 1) {
-		hash ^= input.charCodeAt(i);
-		hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
+	interface MovingPolygon {
+		el: SVGGElement;
+		glowEl: SVGPolygonElement;
+		x: number;
+		y: number;
+		radius: number;
+		vx: number;
+		vy: number;
+		ax: number;
+		ay: number;
+		angle: number;
+		angularVelocity: number;
+		angularAcceleration: number;
+		pulsePhase: number;
+		pulseSpeed: number;
 	}
-	return hash >>> 0;
-}
 
-function createSeededRandom(seed: number) {
-	let t = seed >>> 0;
-	return () => {
-		t += 0x6D2B79F5;
-		let r = Math.imul(t ^ (t >>> 15), t | 1);
-		r ^= r + Math.imul(r ^ (r >>> 7), r | 61);
-		return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
-	};
-}
-
-function clamp(num: number, min: number, max: number) {
-	return Math.max(min, Math.min(max, num));
-}
-
-function stopBackgroundAnimation() {
-	if (bgAnimationFrameId !== null) {
-		cancelAnimationFrame(bgAnimationFrameId);
-		bgAnimationFrameId = null;
+	interface FloatingFragment {
+		el: SVGCircleElement;
+		x: number;
+		y: number;
+		radius: number;
+		vx: number;
+		vy: number;
+		lifePhase: number;
+		lifeSpeed: number;
 	}
-}
 
-function getBackgroundPatternSeed(): string {
-	const configuredSeed = siteConfig.backgroundPattern?.seed?.trim();
-	if (configuredSeed) return configuredSeed;
+	interface FloatingStreak {
+		el: SVGLineElement;
+		x: number;
+		y: number;
+		length: number;
+		vx: number;
+		vy: number;
+		angle: number;
+		lifePhase: number;
+		lifeSpeed: number;
+	}
 
-	const STORAGE_KEY = 'bg-pattern-seed';
-	const existing = localStorage.getItem(STORAGE_KEY);
-	if (existing) return existing;
+	let movingPolygons: MovingPolygon[] = [];
+	let floatingFragments: FloatingFragment[] = [];
+	let floatingStreaks: FloatingStreak[] = [];
+	let bgAnimationFrameId: number | null = null;
+	let lastAnimationTime = 0;
 
-	const generated = `${window.location.hostname}-${crypto.randomUUID()}`;
-	localStorage.setItem(STORAGE_KEY, generated);
-	return generated;
-}
+	function hashStringToSeed(input: string): number {
+		let hash = 2166136261;
+		for (let i = 0; i < input.length; i += 1) {
+			hash ^= input.charCodeAt(i);
+			hash +=
+				(hash << 1) +
+				(hash << 4) +
+				(hash << 7) +
+				(hash << 8) +
+				(hash << 24);
+		}
+		return hash >>> 0;
+	}
 
-function startBackgroundAnimation() {
-	stopBackgroundAnimation();
-	lastAnimationTime = performance.now();
+	function createSeededRandom(seed: number) {
+		let t = seed >>> 0;
+		return () => {
+			t += 0x6d2b79f5;
+			let r = Math.imul(t ^ (t >>> 15), t | 1);
+			r ^= r + Math.imul(r ^ (r >>> 7), r | 61);
+			return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+		};
+	}
 
-	const MAX_SPEED = 36;
-	const MAX_ANGULAR_SPEED = 1.2;
-	const LINEAR_DAMPING_PER_SECOND = 0.9;
-	const ANGULAR_DAMPING_PER_SECOND = 0.92;
-	const BOUNCE_RESTITUTION = 0.88;
+	function clamp(num: number, min: number, max: number) {
+		return Math.max(min, Math.min(max, num));
+	}
 
-	const animate = (now: number) => {
-		const dt = Math.min(0.035, (now - lastAnimationTime) / 1000);
-		lastAnimationTime = now;
+	function stopBackgroundAnimation() {
+		if (bgAnimationFrameId !== null) {
+			cancelAnimationFrame(bgAnimationFrameId);
+			bgAnimationFrameId = null;
+		}
+	}
+
+	function getBackgroundPatternSeed(): string {
+		const configuredSeed = siteConfig.backgroundPattern?.seed?.trim();
+		if (configuredSeed) return configuredSeed;
+
+		const STORAGE_KEY = "bg-pattern-seed";
+		const existing = localStorage.getItem(STORAGE_KEY);
+		if (existing) return existing;
+
+		const generated = `${window.location.hostname}-${crypto.randomUUID()}`;
+		localStorage.setItem(STORAGE_KEY, generated);
+		return generated;
+	}
+
+	function startBackgroundAnimation() {
+		stopBackgroundAnimation();
+		lastAnimationTime = performance.now();
+
+		const MAX_SPEED = 36;
+		const MAX_ANGULAR_SPEED = 1.2;
+		const LINEAR_DAMPING_PER_SECOND = 0.9;
+		const ANGULAR_DAMPING_PER_SECOND = 0.92;
+		const BOUNCE_RESTITUTION = 0.88;
+
+		const animate = (now: number) => {
+			const dt = Math.min(0.035, (now - lastAnimationTime) / 1000);
+			lastAnimationTime = now;
+
+			const width = window.innerWidth;
+			const height = window.innerHeight;
+			const linearDampingFactor = Math.pow(LINEAR_DAMPING_PER_SECOND, dt);
+			const angularDampingFactor = Math.pow(
+				ANGULAR_DAMPING_PER_SECOND,
+				dt,
+			);
+
+			movingPolygons.forEach((p) => {
+				p.vx += p.ax * dt;
+				p.vy += p.ay * dt;
+
+				p.vx *= linearDampingFactor;
+				p.vy *= linearDampingFactor;
+
+				const speed = Math.hypot(p.vx, p.vy);
+				if (speed > MAX_SPEED) {
+					const scale = MAX_SPEED / speed;
+					p.vx *= scale;
+					p.vy *= scale;
+				}
+
+				p.x += p.vx * dt;
+				p.y += p.vy * dt;
+
+				p.angularVelocity += p.angularAcceleration * dt;
+				p.angularVelocity *= angularDampingFactor;
+				p.angularVelocity = clamp(
+					p.angularVelocity,
+					-MAX_ANGULAR_SPEED,
+					MAX_ANGULAR_SPEED,
+				);
+				p.angle += p.angularVelocity * dt;
+				p.pulsePhase += p.pulseSpeed * dt;
+
+				if (p.x - p.radius < 0) {
+					p.x = p.radius;
+					p.vx = Math.abs(p.vx) * BOUNCE_RESTITUTION;
+					p.ax *= -1;
+				}
+				if (p.x + p.radius > width) {
+					p.x = width - p.radius;
+					p.vx = -Math.abs(p.vx) * BOUNCE_RESTITUTION;
+					p.ax *= -1;
+				}
+				if (p.y - p.radius < 0) {
+					p.y = p.radius;
+					p.vy = Math.abs(p.vy) * BOUNCE_RESTITUTION;
+					p.ay *= -1;
+				}
+				if (p.y + p.radius > height) {
+					p.y = height - p.radius;
+					p.vy = -Math.abs(p.vy) * BOUNCE_RESTITUTION;
+					p.ay *= -1;
+				}
+
+				const pulse = 0.5 + 0.5 * Math.sin(p.pulsePhase);
+				const glowOpacity = 0.02 + pulse * 0.075;
+				const glowScale = 1.02 + pulse * 0.28;
+				p.glowEl.setAttribute("opacity", glowOpacity.toFixed(3));
+				p.glowEl.setAttribute(
+					"transform",
+					`scale(${glowScale.toFixed(3)})`,
+				);
+
+				p.el.setAttribute(
+					"transform",
+					`translate(${p.x.toFixed(2)} ${p.y.toFixed(2)}) rotate(${((p.angle * 180) / Math.PI).toFixed(2)})`,
+				);
+			});
+
+			floatingFragments.forEach((fragment) => {
+				fragment.x += fragment.vx * dt;
+				fragment.y += fragment.vy * dt;
+				fragment.lifePhase += fragment.lifeSpeed * dt;
+
+				if (fragment.x < -20) fragment.x = width + 20;
+				if (fragment.x > width + 20) fragment.x = -20;
+				if (fragment.y < -20) fragment.y = height + 20;
+				if (fragment.y > height + 20) fragment.y = -20;
+
+				const twinkle = 0.5 + 0.5 * Math.sin(fragment.lifePhase);
+				const opacity = 0.14 + twinkle * 0.28;
+				const r = fragment.radius * (0.9 + twinkle * 0.45);
+				fragment.el.setAttribute("cx", fragment.x.toFixed(2));
+				fragment.el.setAttribute("cy", fragment.y.toFixed(2));
+				fragment.el.setAttribute("r", r.toFixed(2));
+				fragment.el.setAttribute("opacity", opacity.toFixed(3));
+			});
+
+			floatingStreaks.forEach((streak) => {
+				streak.x += streak.vx * dt;
+				streak.y += streak.vy * dt;
+				streak.lifePhase += streak.lifeSpeed * dt;
+
+				if (streak.x < -28) streak.x = width + 28;
+				if (streak.x > width + 28) streak.x = -28;
+				if (streak.y < -28) streak.y = height + 28;
+				if (streak.y > height + 28) streak.y = -28;
+
+				const shimmer = 0.5 + 0.5 * Math.sin(streak.lifePhase);
+				const opacity = 0.08 + shimmer * 0.2;
+				const length = streak.length * (0.85 + shimmer * 0.4);
+				const dx = Math.cos(streak.angle) * length;
+				const dy = Math.sin(streak.angle) * length;
+
+				streak.el.setAttribute("x1", (streak.x - dx * 0.5).toFixed(2));
+				streak.el.setAttribute("y1", (streak.y - dy * 0.5).toFixed(2));
+				streak.el.setAttribute("x2", (streak.x + dx * 0.5).toFixed(2));
+				streak.el.setAttribute("y2", (streak.y + dy * 0.5).toFixed(2));
+				streak.el.setAttribute("opacity", opacity.toFixed(3));
+			});
+
+			bgAnimationFrameId = requestAnimationFrame(animate);
+		};
+
+		bgAnimationFrameId = requestAnimationFrame(animate);
+	}
+
+	function generateBackgroundPattern() {
+		const patternConfig = siteConfig.backgroundPattern;
+		if (patternConfig?.enable === false) {
+			stopBackgroundAnimation();
+			return;
+		}
+
+		const patternWrapper = document.getElementById("generated-bg-pattern");
+		const svgElement = document.getElementById("generated-bg-pattern-svg");
+		if (
+			!patternWrapper ||
+			!svgElement ||
+			!(svgElement instanceof SVGSVGElement)
+		)
+			return;
 
 		const width = window.innerWidth;
 		const height = window.innerHeight;
-		const linearDampingFactor = Math.pow(LINEAR_DAMPING_PER_SECOND, dt);
-		const angularDampingFactor = Math.pow(ANGULAR_DAMPING_PER_SECOND, dt);
+		svgElement.setAttribute("viewBox", `0 0 ${width} ${height}`);
+		svgElement.innerHTML = "";
+		movingPolygons = [];
+		floatingFragments = [];
+		floatingStreaks = [];
 
-		movingPolygons.forEach(p => {
-			p.vx += p.ax * dt;
-			p.vy += p.ay * dt;
+		const defs = document.createElementNS(
+			"http://www.w3.org/2000/svg",
+			"defs",
+		);
+		const glowFilter = document.createElementNS(
+			"http://www.w3.org/2000/svg",
+			"filter",
+		);
+		glowFilter.setAttribute("id", "bg-shape-glow-filter");
+		glowFilter.setAttribute("x", "-120%");
+		glowFilter.setAttribute("y", "-120%");
+		glowFilter.setAttribute("width", "340%");
+		glowFilter.setAttribute("height", "340%");
+		glowFilter.setAttribute("color-interpolation-filters", "sRGB");
 
-			p.vx *= linearDampingFactor;
-			p.vy *= linearDampingFactor;
+		const blur = document.createElementNS(
+			"http://www.w3.org/2000/svg",
+			"feGaussianBlur",
+		);
+		blur.setAttribute("in", "SourceGraphic");
+		blur.setAttribute("stdDeviation", "6.2");
+		blur.setAttribute("result", "blurredGlow");
 
-			const speed = Math.hypot(p.vx, p.vy);
-			if (speed > MAX_SPEED) {
-				const scale = MAX_SPEED / speed;
-				p.vx *= scale;
-				p.vy *= scale;
-			}
+		const merge = document.createElementNS(
+			"http://www.w3.org/2000/svg",
+			"feMerge",
+		);
+		const mergeNodeA = document.createElementNS(
+			"http://www.w3.org/2000/svg",
+			"feMergeNode",
+		);
+		mergeNodeA.setAttribute("in", "blurredGlow");
+		const mergeNodeB = document.createElementNS(
+			"http://www.w3.org/2000/svg",
+			"feMergeNode",
+		);
+		mergeNodeB.setAttribute("in", "SourceGraphic");
+		merge.appendChild(mergeNodeA);
+		merge.appendChild(mergeNodeB);
 
-			p.x += p.vx * dt;
-			p.y += p.vy * dt;
+		glowFilter.appendChild(blur);
+		glowFilter.appendChild(merge);
+		defs.appendChild(glowFilter);
+		svgElement.appendChild(defs);
 
-			p.angularVelocity += p.angularAcceleration * dt;
-			p.angularVelocity *= angularDampingFactor;
-			p.angularVelocity = clamp(p.angularVelocity, -MAX_ANGULAR_SPEED, MAX_ANGULAR_SPEED);
-			p.angle += p.angularVelocity * dt;
-			p.pulsePhase += p.pulseSpeed * dt;
+		const density = clamp(patternConfig?.density ?? 1, 0.4, 2.5);
+		const particleDensity = clamp(
+			patternConfig?.particleDensity ?? 1,
+			0.3,
+			3.5,
+		);
+		const strokeAlpha = clamp(
+			patternConfig?.strokeAlpha ?? 0.16,
+			0.03,
+			0.45,
+		);
+		const topSafeZoneRatio = clamp(
+			patternConfig?.topSafeZoneRatio ?? 0.42,
+			0.15,
+			0.75,
+		);
 
-			if (p.x - p.radius < 0) {
-				p.x = p.radius;
-				p.vx = Math.abs(p.vx) * BOUNCE_RESTITUTION;
-				p.ax *= -1;
-			}
-			if (p.x + p.radius > width) {
-				p.x = width - p.radius;
-				p.vx = -Math.abs(p.vx) * BOUNCE_RESTITUTION;
-				p.ax *= -1;
-			}
-			if (p.y - p.radius < 0) {
-				p.y = p.radius;
-				p.vy = Math.abs(p.vy) * BOUNCE_RESTITUTION;
-				p.ay *= -1;
-			}
-			if (p.y + p.radius > height) {
-				p.y = height - p.radius;
-				p.vy = -Math.abs(p.vy) * BOUNCE_RESTITUTION;
-				p.ay *= -1;
-			}
+		const seedText = `${getBackgroundPatternSeed()}-${width}x${height}-${bannerEnabled}`;
+		const random = createSeededRandom(hashStringToSeed(seedText));
 
-			const pulse = 0.5 + 0.5 * Math.sin(p.pulsePhase);
-			const glowOpacity = 0.02 + pulse * 0.075;
-			const glowScale = 1.02 + pulse * 0.28;
-			p.glowEl.setAttribute('opacity', glowOpacity.toFixed(3));
-			p.glowEl.setAttribute('transform', `scale(${glowScale.toFixed(3)})`);
+		const minDistance =
+			Math.max(110, Math.min(width, height) * 0.12) / Math.sqrt(density);
+		const topSafeZone = bannerEnabled
+			? Math.min(height * topSafeZoneRatio, 420)
+			: 90;
+		const sidePadding = 40;
+		const bottomPadding = 36;
+		const polygonCount = Math.max(
+			8,
+			Math.floor(((width * height) / 95000) * density),
+		);
 
-			p.el.setAttribute('transform', `translate(${p.x.toFixed(2)} ${p.y.toFixed(2)}) rotate(${(p.angle * 180 / Math.PI).toFixed(2)})`);
-		});
+		const points: Array<{ x: number; y: number; r: number }> = [];
+		let attempts = 0;
+		const maxAttempts = polygonCount * 45;
 
-		floatingFragments.forEach(fragment => {
-			fragment.x += fragment.vx * dt;
-			fragment.y += fragment.vy * dt;
-			fragment.lifePhase += fragment.lifeSpeed * dt;
+		while (points.length < polygonCount && attempts < maxAttempts) {
+			attempts += 1;
+			const radius = 24 + random() * 48;
+			const x =
+				sidePadding +
+				radius +
+				random() * Math.max(1, width - (sidePadding + radius) * 2);
+			const y =
+				topSafeZone +
+				radius +
+				random() *
+					Math.max(
+						1,
+						height - topSafeZone - bottomPadding - radius * 2,
+					);
 
-			if (fragment.x < -20) fragment.x = width + 20;
-			if (fragment.x > width + 20) fragment.x = -20;
-			if (fragment.y < -20) fragment.y = height + 20;
-			if (fragment.y > height + 20) fragment.y = -20;
+			const isTooClose = points.some((p) => {
+				const dx = p.x - x;
+				const dy = p.y - y;
+				return Math.hypot(dx, dy) < minDistance;
+			});
 
-			const twinkle = 0.5 + 0.5 * Math.sin(fragment.lifePhase);
-			const opacity = 0.14 + twinkle * 0.28;
-			const r = fragment.radius * (0.9 + twinkle * 0.45);
-			fragment.el.setAttribute('cx', fragment.x.toFixed(2));
-			fragment.el.setAttribute('cy', fragment.y.toFixed(2));
-			fragment.el.setAttribute('r', r.toFixed(2));
-			fragment.el.setAttribute('opacity', opacity.toFixed(3));
-		});
-
-		floatingStreaks.forEach(streak => {
-			streak.x += streak.vx * dt;
-			streak.y += streak.vy * dt;
-			streak.lifePhase += streak.lifeSpeed * dt;
-
-			if (streak.x < -28) streak.x = width + 28;
-			if (streak.x > width + 28) streak.x = -28;
-			if (streak.y < -28) streak.y = height + 28;
-			if (streak.y > height + 28) streak.y = -28;
-
-			const shimmer = 0.5 + 0.5 * Math.sin(streak.lifePhase);
-			const opacity = 0.08 + shimmer * 0.2;
-			const length = streak.length * (0.85 + shimmer * 0.4);
-			const dx = Math.cos(streak.angle) * length;
-			const dy = Math.sin(streak.angle) * length;
-
-			streak.el.setAttribute('x1', (streak.x - dx * 0.5).toFixed(2));
-			streak.el.setAttribute('y1', (streak.y - dy * 0.5).toFixed(2));
-			streak.el.setAttribute('x2', (streak.x + dx * 0.5).toFixed(2));
-			streak.el.setAttribute('y2', (streak.y + dy * 0.5).toFixed(2));
-			streak.el.setAttribute('opacity', opacity.toFixed(3));
-		});
-
-		bgAnimationFrameId = requestAnimationFrame(animate);
-	};
-
-	bgAnimationFrameId = requestAnimationFrame(animate);
-}
-
-function generateBackgroundPattern() {
-	const patternConfig = siteConfig.backgroundPattern;
-	if (patternConfig?.enable === false) {
-		stopBackgroundAnimation();
-		return;
-	}
-
-	const patternWrapper = document.getElementById('generated-bg-pattern');
-	const svgElement = document.getElementById('generated-bg-pattern-svg');
-	if (!patternWrapper || !svgElement || !(svgElement instanceof SVGSVGElement)) return;
-
-	const width = window.innerWidth;
-	const height = window.innerHeight;
-	svgElement.setAttribute('viewBox', `0 0 ${width} ${height}`);
-	svgElement.innerHTML = '';
-	movingPolygons = [];
-	floatingFragments = [];
-	floatingStreaks = [];
-
-	const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-	const glowFilter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
-	glowFilter.setAttribute('id', 'bg-shape-glow-filter');
-	glowFilter.setAttribute('x', '-120%');
-	glowFilter.setAttribute('y', '-120%');
-	glowFilter.setAttribute('width', '340%');
-	glowFilter.setAttribute('height', '340%');
-	glowFilter.setAttribute('color-interpolation-filters', 'sRGB');
-
-	const blur = document.createElementNS('http://www.w3.org/2000/svg', 'feGaussianBlur');
-	blur.setAttribute('in', 'SourceGraphic');
-	blur.setAttribute('stdDeviation', '6.2');
-	blur.setAttribute('result', 'blurredGlow');
-
-	const merge = document.createElementNS('http://www.w3.org/2000/svg', 'feMerge');
-	const mergeNodeA = document.createElementNS('http://www.w3.org/2000/svg', 'feMergeNode');
-	mergeNodeA.setAttribute('in', 'blurredGlow');
-	const mergeNodeB = document.createElementNS('http://www.w3.org/2000/svg', 'feMergeNode');
-	mergeNodeB.setAttribute('in', 'SourceGraphic');
-	merge.appendChild(mergeNodeA);
-	merge.appendChild(mergeNodeB);
-
-	glowFilter.appendChild(blur);
-	glowFilter.appendChild(merge);
-	defs.appendChild(glowFilter);
-	svgElement.appendChild(defs);
-
-	const density = clamp(patternConfig?.density ?? 1, 0.4, 2.5);
-	const particleDensity = clamp(patternConfig?.particleDensity ?? 1, 0.3, 3.5);
-	const strokeAlpha = clamp(patternConfig?.strokeAlpha ?? 0.16, 0.03, 0.45);
-	const topSafeZoneRatio = clamp(patternConfig?.topSafeZoneRatio ?? 0.42, 0.15, 0.75);
-
-	const seedText = `${getBackgroundPatternSeed()}-${width}x${height}-${bannerEnabled}`;
-	const random = createSeededRandom(hashStringToSeed(seedText));
-
-	const minDistance = Math.max(110, Math.min(width, height) * 0.12) / Math.sqrt(density);
-	const topSafeZone = bannerEnabled ? Math.min(height * topSafeZoneRatio, 420) : 90;
-	const sidePadding = 40;
-	const bottomPadding = 36;
-	const polygonCount = Math.max(8, Math.floor(((width * height) / 95000) * density));
-
-	const points: Array<{ x: number; y: number; r: number }> = [];
-	let attempts = 0;
-	const maxAttempts = polygonCount * 45;
-
-	while (points.length < polygonCount && attempts < maxAttempts) {
-		attempts += 1;
-		const radius = 24 + random() * 48;
-		const x = sidePadding + radius + random() * Math.max(1, width - (sidePadding + radius) * 2);
-		const y = topSafeZone + radius + random() * Math.max(1, height - topSafeZone - bottomPadding - radius * 2);
-
-		const isTooClose = points.some(p => {
-			const dx = p.x - x;
-			const dy = p.y - y;
-			return Math.hypot(dx, dy) < minDistance;
-		});
-
-		if (!isTooClose) {
-			points.push({ x, y, r: radius });
-		}
-	}
-
-	points.forEach(({ x, y, r }) => {
-		const vertexCount = 3 + Math.floor(random() * 4);
-		const rotation = random() * Math.PI * 2;
-		const vertices: string[] = [];
-
-		for (let i = 0; i < vertexCount; i += 1) {
-			const angle = rotation + (Math.PI * 2 * i) / vertexCount;
-			const currentRadius = r * (0.72 + random() * 0.38);
-			const px = Math.cos(angle) * currentRadius;
-			const py = Math.sin(angle) * currentRadius;
-			vertices.push(`${px.toFixed(1)},${py.toFixed(1)}`);
-		}
-
-		const pointsValue = vertices.join(' ');
-		const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-
-		const glowPolygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
-		glowPolygon.setAttribute('points', pointsValue);
-		glowPolygon.setAttribute('fill', `oklch(0.84 0.16 calc(var(--hue) + ${Math.round(random() * 24 - 12)}) / 0.1)`);
-		glowPolygon.setAttribute('stroke', 'none');
-		glowPolygon.setAttribute('filter', 'url(#bg-shape-glow-filter)');
-		glowPolygon.setAttribute('opacity', (0.035 + random() * 0.055).toFixed(3));
-		group.appendChild(glowPolygon);
-
-		const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
-		polygon.setAttribute('points', pointsValue);
-		polygon.setAttribute('fill', 'none');
-		polygon.setAttribute('stroke', `oklch(0.73 0.09 var(--hue) / ${strokeAlpha.toFixed(3)})`);
-		polygon.setAttribute('stroke-width', (1 + random() * 1.1).toFixed(2));
-		polygon.setAttribute('vector-effect', 'non-scaling-stroke');
-		group.appendChild(polygon);
-		svgElement.appendChild(group);
-
-		const speed = 10 + random() * 18;
-		const moveDirection = random() * Math.PI * 2;
-		const accStrength = 2 + random() * 5;
-		const accDirection = random() * Math.PI * 2;
-
-		movingPolygons.push({
-			el: group,
-			glowEl: glowPolygon,
-			x,
-			y,
-			radius: r,
-			vx: Math.cos(moveDirection) * speed,
-			vy: Math.sin(moveDirection) * speed,
-			ax: Math.cos(accDirection) * accStrength,
-			ay: Math.sin(accDirection) * accStrength,
-			angle: random() * Math.PI * 2,
-			angularVelocity: (random() * 2 - 1) * 0.9,
-			angularAcceleration: (random() * 2 - 1) * 0.18,
-			pulsePhase: random() * Math.PI * 2,
-			pulseSpeed: 0.7 + random() * 1.4,
-		});
-	});
-
-	const fragmentCount = Math.max(26, Math.floor((width * height) / 26000 * density * particleDensity));
-	for (let i = 0; i < fragmentCount; i += 1) {
-		const x = random() * width;
-		const y = topSafeZone + random() * Math.max(1, height - topSafeZone - 8);
-		const radius = 0.75 + random() * 2.2;
-		const fragment = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-		fragment.setAttribute('cx', x.toFixed(2));
-		fragment.setAttribute('cy', y.toFixed(2));
-		fragment.setAttribute('r', radius.toFixed(2));
-		fragment.setAttribute('fill', `oklch(0.9 0.14 calc(var(--hue) + ${Math.round(random() * 40 - 20)}) / ${ (0.22 + random() * 0.2).toFixed(3) })`);
-		fragment.setAttribute('filter', 'url(#bg-shape-glow-filter)');
-		svgElement.appendChild(fragment);
-
-		const speed = 4 + random() * 13;
-		const direction = random() * Math.PI * 2;
-
-		floatingFragments.push({
-			el: fragment,
-			x,
-			y,
-			radius,
-			vx: Math.cos(direction) * speed,
-			vy: Math.sin(direction) * speed,
-			lifePhase: random() * Math.PI * 2,
-			lifeSpeed: 0.8 + random() * 2.6,
-		});
-	}
-
-	const streakCount = Math.max(12, Math.floor((width * height) / 98000 * density * particleDensity));
-	for (let i = 0; i < streakCount; i += 1) {
-		const x = random() * width;
-		const y = topSafeZone + random() * Math.max(1, height - topSafeZone - 10);
-		const length = 6 + random() * 14;
-		const angle = random() * Math.PI * 2;
-		const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-		line.setAttribute('stroke', `oklch(0.9 0.12 calc(var(--hue) + ${Math.round(random() * 42 - 21)}) / ${ (0.16 + random() * 0.16).toFixed(3) })`);
-		line.setAttribute('stroke-width', (0.55 + random() * 0.95).toFixed(2));
-		line.setAttribute('stroke-linecap', 'round');
-		line.setAttribute('filter', 'url(#bg-shape-glow-filter)');
-		svgElement.appendChild(line);
-
-		const speed = 8 + random() * 22;
-		const direction = angle + (random() * 0.65 - 0.325);
-		floatingStreaks.push({
-			el: line,
-			x,
-			y,
-			length,
-			vx: Math.cos(direction) * speed,
-			vy: Math.sin(direction) * speed,
-			angle,
-			lifePhase: random() * Math.PI * 2,
-			lifeSpeed: 1 + random() * 2.4,
-		});
-	}
-
-	startBackgroundAnimation();
-}
-
-function setClickOutsideToClose(panel: string, ignores: string[]) {
-	document.addEventListener("click", event => {
-		let panelDom = document.getElementById(panel);
-		let tDom = event.target;
-		if (!(tDom instanceof Node)) return;		// Ensure the event target is an HTML Node
-		for (let ig of ignores) {
-			let ie = document.getElementById(ig)
-			if (ie == tDom || (ie?.contains(tDom))) {
-				return;
+			if (!isTooClose) {
+				points.push({ x, y, r: radius });
 			}
 		}
-		panelDom!.classList.add("float-panel-closed");
-	});
-}
-setClickOutsideToClose("display-setting", ["display-setting", "display-settings-switch"])
-setClickOutsideToClose("nav-menu-panel", ["nav-menu-panel", "nav-menu-switch"])
-setClickOutsideToClose("search-panel", ["search-panel", "search-bar", "search-switch"])
 
+		points.forEach(({ x, y, r }) => {
+			const vertexCount = 3 + Math.floor(random() * 4);
+			const rotation = random() * Math.PI * 2;
+			const vertices: string[] = [];
 
-function loadTheme() {
-	const theme = getStoredTheme()
-	setTheme(theme)
-}
-
-function loadHue() {
-	setHue(getHue())
-}
-
-function initCustomScrollbar() {
-	const bodyElement = document.querySelector('body');
-	if (!bodyElement) return;
-	OverlayScrollbars(
-		// docs say that a initialization to the body element would affect native functionality like window.scrollTo
-		// but just leave it here for now
-		{
-			target: bodyElement,
-			cancel: {
-				nativeScrollbarsOverlaid: true,    // don't initialize the overlay scrollbar if there is a native one
+			for (let i = 0; i < vertexCount; i += 1) {
+				const angle = rotation + (Math.PI * 2 * i) / vertexCount;
+				const currentRadius = r * (0.72 + random() * 0.38);
+				const px = Math.cos(angle) * currentRadius;
+				const py = Math.sin(angle) * currentRadius;
+				vertices.push(`${px.toFixed(1)},${py.toFixed(1)}`);
 			}
-		}, {
-		scrollbars: {
-			theme: 'scrollbar-base scrollbar-auto py-1',
-			autoHide: 'move',
-			autoHideDelay: 500,
-			autoHideSuspend: false,
-		},
-	});
 
-	const katexElements = document.querySelectorAll('.katex-display') as NodeListOf<HTMLElement>;
+			const pointsValue = vertices.join(" ");
+			const group = document.createElementNS(
+				"http://www.w3.org/2000/svg",
+				"g",
+			);
 
-	const katexObserverOptions = {
-		root: null,
-		rootMargin: '100px',
-		threshold: 0.1
-	};
+			const glowPolygon = document.createElementNS(
+				"http://www.w3.org/2000/svg",
+				"polygon",
+			);
+			glowPolygon.setAttribute("points", pointsValue);
+			glowPolygon.setAttribute(
+				"fill",
+				`oklch(0.84 0.16 calc(var(--hue) + ${Math.round(random() * 24 - 12)}) / 0.1)`,
+			);
+			glowPolygon.setAttribute("stroke", "none");
+			glowPolygon.setAttribute("filter", "url(#bg-shape-glow-filter)");
+			glowPolygon.setAttribute(
+				"opacity",
+				(0.035 + random() * 0.055).toFixed(3),
+			);
+			group.appendChild(glowPolygon);
 
-	const processKatexElement = (element: HTMLElement) => {
-		if (!element.parentNode) return;
-		if (element.hasAttribute('data-scrollbar-initialized')) return;
+			const polygon = document.createElementNS(
+				"http://www.w3.org/2000/svg",
+				"polygon",
+			);
+			polygon.setAttribute("points", pointsValue);
+			polygon.setAttribute("fill", "none");
+			polygon.setAttribute(
+				"stroke",
+				`oklch(0.73 0.09 var(--hue) / ${strokeAlpha.toFixed(3)})`,
+			);
+			polygon.setAttribute(
+				"stroke-width",
+				(1 + random() * 1.1).toFixed(2),
+			);
+			polygon.setAttribute("vector-effect", "non-scaling-stroke");
+			group.appendChild(polygon);
+			svgElement.appendChild(group);
 
-		const container = document.createElement('div');
-		container.className = 'katex-display-container';
-		container.setAttribute('aria-label', 'scrollable container for formulas');
+			const speed = 10 + random() * 18;
+			const moveDirection = random() * Math.PI * 2;
+			const accStrength = 2 + random() * 5;
+			const accDirection = random() * Math.PI * 2;
 
-		element.parentNode.insertBefore(container, element);
-		container.appendChild(element);
-
-		OverlayScrollbars(container, {
-			scrollbars: {
-				theme: 'scrollbar-base scrollbar-auto',
-				autoHide: 'leave',
-				autoHideDelay: 500,
-				autoHideSuspend: false
-			}
+			movingPolygons.push({
+				el: group,
+				glowEl: glowPolygon,
+				x,
+				y,
+				radius: r,
+				vx: Math.cos(moveDirection) * speed,
+				vy: Math.sin(moveDirection) * speed,
+				ax: Math.cos(accDirection) * accStrength,
+				ay: Math.sin(accDirection) * accStrength,
+				angle: random() * Math.PI * 2,
+				angularVelocity: (random() * 2 - 1) * 0.9,
+				angularAcceleration: (random() * 2 - 1) * 0.18,
+				pulsePhase: random() * Math.PI * 2,
+				pulseSpeed: 0.7 + random() * 1.4,
+			});
 		});
 
-		element.setAttribute('data-scrollbar-initialized', 'true');
-	};
+		const fragmentCount = Math.max(
+			26,
+			Math.floor(((width * height) / 26000) * density * particleDensity),
+		);
+		for (let i = 0; i < fragmentCount; i += 1) {
+			const x = random() * width;
+			const y =
+				topSafeZone + random() * Math.max(1, height - topSafeZone - 8);
+			const radius = 0.75 + random() * 2.2;
+			const fragment = document.createElementNS(
+				"http://www.w3.org/2000/svg",
+				"circle",
+			);
+			fragment.setAttribute("cx", x.toFixed(2));
+			fragment.setAttribute("cy", y.toFixed(2));
+			fragment.setAttribute("r", radius.toFixed(2));
+			fragment.setAttribute(
+				"fill",
+				`oklch(0.9 0.14 calc(var(--hue) + ${Math.round(random() * 40 - 20)}) / ${(0.22 + random() * 0.2).toFixed(3)})`,
+			);
+			fragment.setAttribute("filter", "url(#bg-shape-glow-filter)");
+			svgElement.appendChild(fragment);
 
-	const katexObserver = new IntersectionObserver((entries, observer) => {
-		entries.forEach(entry => {
-			if (entry.isIntersecting) {
-			processKatexElement(entry.target as HTMLElement);
-			observer.unobserve(entry.target);
-			}
-		});
-	}, katexObserverOptions);
+			const speed = 4 + random() * 13;
+			const direction = random() * Math.PI * 2;
 
-	katexElements.forEach(element => {
-		katexObserver.observe(element);
-	});
-}
+			floatingFragments.push({
+				el: fragment,
+				x,
+				y,
+				radius,
+				vx: Math.cos(direction) * speed,
+				vy: Math.sin(direction) * speed,
+				lifePhase: random() * Math.PI * 2,
+				lifeSpeed: 0.8 + random() * 2.6,
+			});
+		}
 
-function showBanner() {
-	if (!siteConfig.banner.enable) return;
+		const streakCount = Math.max(
+			12,
+			Math.floor(((width * height) / 98000) * density * particleDensity),
+		);
+		for (let i = 0; i < streakCount; i += 1) {
+			const x = random() * width;
+			const y =
+				topSafeZone + random() * Math.max(1, height - topSafeZone - 10);
+			const length = 6 + random() * 14;
+			const angle = random() * Math.PI * 2;
+			const line = document.createElementNS(
+				"http://www.w3.org/2000/svg",
+				"line",
+			);
+			line.setAttribute(
+				"stroke",
+				`oklch(0.9 0.12 calc(var(--hue) + ${Math.round(random() * 42 - 21)}) / ${(0.16 + random() * 0.16).toFixed(3)})`,
+			);
+			line.setAttribute(
+				"stroke-width",
+				(0.55 + random() * 0.95).toFixed(2),
+			);
+			line.setAttribute("stroke-linecap", "round");
+			line.setAttribute("filter", "url(#bg-shape-glow-filter)");
+			svgElement.appendChild(line);
 
-	const banner = document.getElementById('banner');
-	if (!banner) {
-		console.error('Banner element not found');
-		return;
+			const speed = 8 + random() * 22;
+			const direction = angle + (random() * 0.65 - 0.325);
+			floatingStreaks.push({
+				el: line,
+				x,
+				y,
+				length,
+				vx: Math.cos(direction) * speed,
+				vy: Math.sin(direction) * speed,
+				angle,
+				lifePhase: random() * Math.PI * 2,
+				lifeSpeed: 1 + random() * 2.4,
+			});
+		}
+
+		startBackgroundAnimation();
 	}
 
-	banner.classList.remove('opacity-0', 'scale-105');
-}
+	function setClickOutsideToClose(panel: string, ignores: string[]) {
+		document.addEventListener("click", (event) => {
+			let panelDom = document.getElementById(panel);
+			let tDom = event.target;
+			if (!(tDom instanceof Node)) return; // Ensure the event target is an HTML Node
+			for (let ig of ignores) {
+				let ie = document.getElementById(ig);
+				if (ie == tDom || ie?.contains(tDom)) {
+					return;
+				}
+			}
+			panelDom!.classList.add("float-panel-closed");
+		});
+	}
+	setClickOutsideToClose("display-setting", [
+		"display-setting",
+		"display-settings-switch",
+	]);
+	setClickOutsideToClose("nav-menu-panel", [
+		"nav-menu-panel",
+		"nav-menu-switch",
+	]);
+	setClickOutsideToClose("search-panel", [
+		"search-panel",
+		"search-bar",
+		"search-switch",
+	]);
 
-function init() {
-	// disableAnimation()()		// TODO
-	loadTheme();
-	loadHue();
-	generateBackgroundPattern();
-	initCustomScrollbar();
-	showBanner();
-}
+	function loadTheme() {
+		const theme = getStoredTheme();
+		setTheme(theme);
+	}
 
-/* Load settings when entering the site */
-init();
+	function loadHue() {
+		setHue(getHue());
+	}
 
-const setup = () => {
-	// TODO: temp solution to change the height of the banner
-/*
+	function initCustomScrollbar() {
+		const bodyElement = document.querySelector("body");
+		if (!bodyElement) return;
+		OverlayScrollbars(
+			// docs say that a initialization to the body element would affect native functionality like window.scrollTo
+			// but just leave it here for now
+			{
+				target: bodyElement,
+				cancel: {
+					nativeScrollbarsOverlaid: true, // don't initialize the overlay scrollbar if there is a native one
+				},
+			},
+			{
+				scrollbars: {
+					theme: "scrollbar-base scrollbar-auto py-1",
+					autoHide: "move",
+					autoHideDelay: 500,
+					autoHideSuspend: false,
+				},
+			},
+		);
+
+		const katexElements = document.querySelectorAll(
+			".katex-display",
+		) as NodeListOf<HTMLElement>;
+
+		const katexObserverOptions = {
+			root: null,
+			rootMargin: "100px",
+			threshold: 0.1,
+		};
+
+		const processKatexElement = (element: HTMLElement) => {
+			if (!element.parentNode) return;
+			if (element.hasAttribute("data-scrollbar-initialized")) return;
+
+			const container = document.createElement("div");
+			container.className = "katex-display-container";
+			container.setAttribute(
+				"aria-label",
+				"scrollable container for formulas",
+			);
+
+			element.parentNode.insertBefore(container, element);
+			container.appendChild(element);
+
+			OverlayScrollbars(container, {
+				scrollbars: {
+					theme: "scrollbar-base scrollbar-auto",
+					autoHide: "leave",
+					autoHideDelay: 500,
+					autoHideSuspend: false,
+				},
+			});
+
+			element.setAttribute("data-scrollbar-initialized", "true");
+		};
+
+		const katexObserver = new IntersectionObserver((entries, observer) => {
+			entries.forEach((entry) => {
+				if (entry.isIntersecting) {
+					processKatexElement(entry.target as HTMLElement);
+					observer.unobserve(entry.target);
+				}
+			});
+		}, katexObserverOptions);
+
+		katexElements.forEach((element) => {
+			katexObserver.observe(element);
+		});
+	}
+
+	function showBanner() {
+		if (!siteConfig.banner.enable) return;
+
+		const banner = document.getElementById("banner");
+		if (!banner) {
+			console.error("Banner element not found");
+			return;
+		}
+
+		banner.classList.remove("opacity-0", "scale-105");
+	}
+
+	function init() {
+		// disableAnimation()()		// TODO
+		loadTheme();
+		loadHue();
+		generateBackgroundPattern();
+		initCustomScrollbar();
+		showBanner();
+	}
+
+	/* Load settings when entering the site */
+	init();
+
+	const setup = () => {
+		// TODO: temp solution to change the height of the banner
+		/*
 	window.swup.hooks.on('animation:out:start', () => {
 		const path = window.location.pathname
 		const body = document.querySelector('body')
@@ -816,183 +1002,221 @@ const setup = () => {
 		}
 	})
 */
-	window.swup.hooks.on('link:click', () => {
-		// Remove the delay for the first time page load
-		document.documentElement.style.setProperty('--content-delay', '0ms')
+		window.swup.hooks.on("link:click", () => {
+			// Remove the delay for the first time page load
+			document.documentElement.style.setProperty(
+				"--content-delay",
+				"0ms",
+			);
 
-		// prevent elements from overlapping the navbar
-		if (!bannerEnabled) {
-			return
-		}
-		let threshold = window.innerHeight * (BANNER_HEIGHT / 100) - 72 - 16
-		let navbar = document.getElementById('navbar-wrapper')
-		if (!navbar || !document.body.classList.contains('lg:is-home')) {
-			return
-		}
-		if (document.body.scrollTop >= threshold || document.documentElement.scrollTop >= threshold) {
-			navbar.classList.add('navbar-hidden')
-		}
-	})
-	window.swup.hooks.on('content:replace', initCustomScrollbar)
-	window.swup.hooks.on('visit:start', (visit: {to: {url: string}}) => {
-		// change banner height immediately when a link is clicked
-		const bodyElement = document.querySelector('body')
-		const rawPath = new URL(visit.to.url, window.location.origin).pathname
-		if (isHomePath(rawPath)) {
-			bodyElement!.classList.add('lg:is-home');
-		} else {
-			bodyElement!.classList.remove('lg:is-home');
-		}
-
-		// increase the page height during page transition to prevent the scrolling animation from jumping
-		const heightExtend = document.getElementById('page-height-extend')
-		if (heightExtend) {
-			heightExtend.classList.remove('hidden')
-		}
-
-		// Hide the TOC while scrolling back to top
-		let toc = document.getElementById('toc-wrapper');
-		if (toc) {
-			toc.classList.add('toc-not-ready')
-		}
-	});
-	window.swup.hooks.on('page:view', () => {
-		// hide the temp high element when the transition is done
-		const heightExtend = document.getElementById('page-height-extend')
-		if (heightExtend) {
-			heightExtend.classList.remove('hidden')
-		}
-	});
-	window.swup.hooks.on('visit:end', (_visit: {to: {url: string}}) => {
-		setTimeout(() => {
-			const heightExtend = document.getElementById('page-height-extend')
-			if (heightExtend) {
-				heightExtend.classList.add('hidden')
+			// prevent elements from overlapping the navbar
+			if (!bannerEnabled) {
+				return;
 			}
+			let threshold =
+				window.innerHeight * (BANNER_HEIGHT / 100) - 72 - 16;
+			let navbar = document.getElementById("navbar-wrapper");
+			if (!navbar || !document.body.classList.contains("lg:is-home")) {
+				return;
+			}
+			if (
+				document.body.scrollTop >= threshold ||
+				document.documentElement.scrollTop >= threshold
+			) {
+				navbar.classList.add("navbar-hidden");
+			}
+		});
+		window.swup.hooks.on("content:replace", initCustomScrollbar);
+		window.swup.hooks.on(
+			"visit:start",
+			(visit: { to: { url: string } }) => {
+				// change banner height immediately when a link is clicked
+				const bodyElement = document.querySelector("body");
+				const rawPath = new URL(visit.to.url, window.location.origin)
+					.pathname;
+				if (isHomePath(rawPath)) {
+					bodyElement!.classList.add("lg:is-home");
+				} else {
+					bodyElement!.classList.remove("lg:is-home");
+				}
 
-            // Just make the transition looks better
-            const toc = document.getElementById('toc-wrapper');
-            if (toc) {
-                toc.classList.remove('toc-not-ready')
-            }
-        }, 200)
-	});
-}
-if (window?.swup?.hooks) {
-	setup()
-} else {
-	document.addEventListener('swup:enable', setup)
-}
+				// increase the page height during page transition to prevent the scrolling animation from jumping
+				const heightExtend =
+					document.getElementById("page-height-extend");
+				if (heightExtend) {
+					heightExtend.classList.remove("hidden");
+				}
 
-let backToTopBtn = document.getElementById('back-to-top-btn');
-let toc = document.getElementById('toc-wrapper');
-let navbar = document.getElementById('navbar-wrapper')
-function scrollFunction() {
-	let bannerHeight = window.innerHeight * (BANNER_HEIGHT / 100)
+				// Hide the TOC while scrolling back to top
+				let toc = document.getElementById("toc-wrapper");
+				if (toc) {
+					toc.classList.add("toc-not-ready");
+				}
+			},
+		);
+		window.swup.hooks.on("page:view", () => {
+			// hide the temp high element when the transition is done
+			const heightExtend = document.getElementById("page-height-extend");
+			if (heightExtend) {
+				heightExtend.classList.remove("hidden");
+			}
+		});
+		window.swup.hooks.on("visit:end", (_visit: { to: { url: string } }) => {
+			setTimeout(() => {
+				const heightExtend =
+					document.getElementById("page-height-extend");
+				if (heightExtend) {
+					heightExtend.classList.add("hidden");
+				}
 
-	if (backToTopBtn) {
-		if (document.body.scrollTop > bannerHeight || document.documentElement.scrollTop > bannerHeight) {
-			backToTopBtn.classList.remove('hide')
-		} else {
-			backToTopBtn.classList.add('hide')
-		}
+				// Just make the transition looks better
+				const toc = document.getElementById("toc-wrapper");
+				if (toc) {
+					toc.classList.remove("toc-not-ready");
+				}
+			}, 200);
+		});
+	};
+	if (window?.swup?.hooks) {
+		setup();
+	} else {
+		document.addEventListener("swup:enable", setup);
 	}
 
-	if (bannerEnabled && toc) {
-		if (document.body.scrollTop > bannerHeight || document.documentElement.scrollTop > bannerHeight) {
-			toc.classList.remove('toc-hide')
-		} else {
-			toc.classList.add('toc-hide')
+	let backToTopBtn = document.getElementById("back-to-top-btn");
+	let toc = document.getElementById("toc-wrapper");
+	let navbar = document.getElementById("navbar-wrapper");
+	function scrollFunction() {
+		let bannerHeight = window.innerHeight * (BANNER_HEIGHT / 100);
+
+		if (backToTopBtn) {
+			if (
+				document.body.scrollTop > bannerHeight ||
+				document.documentElement.scrollTop > bannerHeight
+			) {
+				backToTopBtn.classList.remove("hide");
+			} else {
+				backToTopBtn.classList.add("hide");
+			}
+		}
+
+		if (bannerEnabled && toc) {
+			if (
+				document.body.scrollTop > bannerHeight ||
+				document.documentElement.scrollTop > bannerHeight
+			) {
+				toc.classList.remove("toc-hide");
+			} else {
+				toc.classList.add("toc-hide");
+			}
+		}
+
+		if (!bannerEnabled) return;
+		if (navbar) {
+			const NAVBAR_HEIGHT = 72;
+			const MAIN_PANEL_EXCESS_HEIGHT =
+				MAIN_PANEL_OVERLAPS_BANNER_HEIGHT * 16; // The height the main panel overlaps the banner
+
+			let bannerHeight = BANNER_HEIGHT;
+			if (
+				document.body.classList.contains("lg:is-home") &&
+				window.innerWidth >= 1024
+			) {
+				bannerHeight = BANNER_HEIGHT_HOME;
+			}
+			let threshold =
+				window.innerHeight * (bannerHeight / 100) -
+				NAVBAR_HEIGHT -
+				MAIN_PANEL_EXCESS_HEIGHT -
+				16;
+			if (
+				document.body.scrollTop >= threshold ||
+				document.documentElement.scrollTop >= threshold
+			) {
+				navbar.classList.add("navbar-hidden");
+			} else {
+				navbar.classList.remove("navbar-hidden");
+			}
 		}
 	}
+	window.onscroll = scrollFunction;
 
-	if (!bannerEnabled) return
-	if (navbar) {
-		const NAVBAR_HEIGHT = 72
-		const MAIN_PANEL_EXCESS_HEIGHT = MAIN_PANEL_OVERLAPS_BANNER_HEIGHT * 16			// The height the main panel overlaps the banner
-
-		let bannerHeight = BANNER_HEIGHT
-		if (document.body.classList.contains('lg:is-home') && window.innerWidth >= 1024) {
-			bannerHeight = BANNER_HEIGHT_HOME
-		}
-		let threshold = window.innerHeight * (bannerHeight / 100) - NAVBAR_HEIGHT - MAIN_PANEL_EXCESS_HEIGHT - 16
-		if (document.body.scrollTop >= threshold || document.documentElement.scrollTop >= threshold) {
-			navbar.classList.add('navbar-hidden')
-		} else {
-			navbar.classList.remove('navbar-hidden')
-		}
-	}
-}
-window.onscroll = scrollFunction
-
-window.onresize = () => {
-	// calculate the --banner-height-extend, which needs to be a multiple of 4 to avoid blurry text
-	let offset = Math.floor(window.innerHeight * (BANNER_HEIGHT_EXTEND / 100));
-	offset = offset - offset % 4;
-	document.documentElement.style.setProperty('--banner-height-extend', `${offset}px`);
-	generateBackgroundPattern();
-}
-
+	window.onresize = () => {
+		// calculate the --banner-height-extend, which needs to be a multiple of 4 to avoid blurry text
+		let offset = Math.floor(
+			window.innerHeight * (BANNER_HEIGHT_EXTEND / 100),
+		);
+		offset = offset - (offset % 4);
+		document.documentElement.style.setProperty(
+			"--banner-height-extend",
+			`${offset}px`,
+		);
+		generateBackgroundPattern();
+	};
 </script>
 
 <script>
-import PhotoSwipeLightbox from "photoswipe/lightbox"
-import "photoswipe/style.css"
+	import PhotoSwipeLightbox from "photoswipe/lightbox";
+	import "photoswipe/style.css";
 
-let lightbox: PhotoSwipeLightbox
-let pswp = import("photoswipe")
+	let lightbox: PhotoSwipeLightbox;
+	let pswp = import("photoswipe");
 
-function createPhotoSwipe() {
-	lightbox = new PhotoSwipeLightbox({
-		gallery: ".custom-md img, #post-cover img",
-		pswpModule: () => pswp,
-		closeSVG: '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#ffffff"><path d="M480-424 284-228q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536-480l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480-424Z"/></svg>',
-		zoomSVG: '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#ffffff"><path d="M340-540h-40q-17 0-28.5-11.5T260-580q0-17 11.5-28.5T300-620h40v-40q0-17 11.5-28.5T380-700q17 0 28.5 11.5T420-660v40h40q17 0 28.5 11.5T500-580q0 17-11.5 28.5T460-540h-40v40q0 17-11.5 28.5T380-460q-17 0-28.5-11.5T340-500v-40Zm40 220q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l224 224q11 11 11 28t-11 28q-11 11-28 11t-28-11L532-372q-30 24-69 38t-83 14Zm0-80q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/></svg>',
-		padding: { top: 20, bottom: 20, left: 20, right: 20 },
-		wheelToZoom: true,
-		arrowPrev: false,
-		arrowNext: false,
-		imageClickAction: 'close',
-		tapAction: 'close',
-		doubleTapAction: 'zoom',
-	})
+	function createPhotoSwipe() {
+		lightbox = new PhotoSwipeLightbox({
+			gallery: ".custom-md img, #post-cover img",
+			pswpModule: () => pswp,
+			closeSVG:
+				'<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#ffffff"><path d="M480-424 284-228q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536-480l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480-424Z"/></svg>',
+			zoomSVG:
+				'<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#ffffff"><path d="M340-540h-40q-17 0-28.5-11.5T260-580q0-17 11.5-28.5T300-620h40v-40q0-17 11.5-28.5T380-700q17 0 28.5 11.5T420-660v40h40q17 0 28.5 11.5T500-580q0 17-11.5 28.5T460-540h-40v40q0 17-11.5 28.5T380-460q-17 0-28.5-11.5T340-500v-40Zm40 220q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l224 224q11 11 11 28t-11 28q-11 11-28 11t-28-11L532-372q-30 24-69 38t-83 14Zm0-80q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/></svg>',
+			padding: { top: 20, bottom: 20, left: 20, right: 20 },
+			wheelToZoom: true,
+			arrowPrev: false,
+			arrowNext: false,
+			imageClickAction: "close",
+			tapAction: "close",
+			doubleTapAction: "zoom",
+		});
 
-	lightbox.addFilter("domItemData", (itemData, element) => {
-		if (element instanceof HTMLImageElement) {
-			itemData.src = element.src
+		lightbox.addFilter("domItemData", (itemData, element) => {
+			if (element instanceof HTMLImageElement) {
+				itemData.src = element.src;
 
-			itemData.w = Number(element.naturalWidth || window.innerWidth)
-			itemData.h = Number(element.naturalHeight || window.innerHeight)
+				itemData.w = Number(element.naturalWidth || window.innerWidth);
+				itemData.h = Number(
+					element.naturalHeight || window.innerHeight,
+				);
 
-			itemData.msrc = element.src
-		}
+				itemData.msrc = element.src;
+			}
 
-		return itemData
-	})
+			return itemData;
+		});
 
-	lightbox.init()
-}
-
-const setup = () => {
-	if (!lightbox) {
-		createPhotoSwipe()
+		lightbox.init();
 	}
-	window.swup.hooks.on("page:view", () => {
-		createPhotoSwipe()
-	})
 
-	window.swup.hooks.on(
-		"content:replace",
-		() => {
-			lightbox?.destroy?.()
-		},
-		{ before: true },
-	)
-}
+	const setup = () => {
+		if (!lightbox) {
+			createPhotoSwipe();
+		}
+		window.swup.hooks.on("page:view", () => {
+			createPhotoSwipe();
+		});
 
-if (window.swup) {
-	setup()
-} else {
-	document.addEventListener("swup:enable", setup)
-}
+		window.swup.hooks.on(
+			"content:replace",
+			() => {
+				lightbox?.destroy?.();
+			},
+			{ before: true },
+		);
+	};
+
+	if (window.swup) {
+		setup();
+	} else {
+		document.addEventListener("swup:enable", setup);
+	}
 </script>

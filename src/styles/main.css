@@ -81,28 +81,35 @@
         filter: saturate(1.03) brightness(1.01);
     }
 
-    .card-base.card-base-nav {
+    #navbar-wrapper {
+        border-radius: var(--radius-large);
+        overflow: visible;
         background: color-mix(in oklab, var(--card-bg) 40%, transparent);
         backdrop-filter: blur(22px) saturate(138%);
         -webkit-backdrop-filter: blur(22px) saturate(138%);
+        z-index: 60;
+    }
+
+    .card-base.card-base-nav {
+        background: transparent;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        box-shadow: none;
     }
 
     .card-base.card-base-nav::after {
         inset: 0;
         transform: translateZ(12px);
-        background:
-            radial-gradient(
-                circle at var(--tilt-pointer-x) var(--tilt-pointer-y),
-                color-mix(in oklab, var(--primary) 26%, transparent) 0%,
-                color-mix(in oklab, var(--primary) 14%, transparent) 34%,
-                transparent 62%
-            );
+        background: none;
+        opacity: 0;
     }
 
-    .card-base.card-base-nav.is-tilting {
+    .card-base.card-base-nav.is-tilting,
+    .card-base.card-base-nav.is-tilting-large {
         --tilt-lift-active: 8px;
         --tilt-scale-active: 1.004;
         --tilt-glow-active: 0.82;
+        box-shadow: none;
     }
 
     .dark .card-base {
@@ -132,6 +139,7 @@
         background: color-mix(in oklab, var(--float-panel-bg) 88%, var(--card-bg));
         backdrop-filter: blur(22px) saturate(145%);
         -webkit-backdrop-filter: blur(22px) saturate(145%);
+        z-index: 70;
     }
     .float-panel-closed {
         @apply -translate-y-1 opacity-0 pointer-events-none
