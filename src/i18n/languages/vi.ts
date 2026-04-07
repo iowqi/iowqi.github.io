@@ -62,7 +62,7 @@ export const vi: Translation = {
 	[Key.year]: "",
 	[Key.calendarClearFilter]: "Xóa lọc theo ngày",
 	[Key.calendarDragHint]:
-		"Kéo trên các ngày để lọc danh sách ở trang chủ. Kéo ra ngoài mép trên/dưới lịch để đổi tháng khi đang chọn.",
+		"Kéo trên các ngày để lọc danh sách ở trang chủ. Kéo ra ngoài mép trên/dưới lịch để đổi tháng khi đang chọn. Bạn cũng có thể bấm một ngày, rồi giữ Shift và bấm ngày khác để chọn khoảng giữa hai ngày.",
 	[Key.calendarPrevMonth]: "Tháng trước",
 	[Key.calendarNextMonth]: "Tháng sau",
 	[Key.calendarBackToday]: "Về hôm nay",

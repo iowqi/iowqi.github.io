@@ -62,7 +62,7 @@ export const tr: Translation = {
 	[Key.year]: "",
 	[Key.calendarClearFilter]: "Tarih filtresini kaldır",
 	[Key.calendarDragHint]:
-		"Ana sayfa yazı listesini süzmek için tarihler üzerinde sürükleyin. Seçim sırasında takvimin üstünden/altından çıkarak ay değiştirebilirsiniz.",
+		"Ana sayfa yazı listesini süzmek için tarihler üzerinde sürükleyin. Seçim sırasında takvimin üstünden/altından çıkarak ay değiştirebilirsiniz. Bir tarihe tıklayıp ardından Shift ile başka bir tarihe tıklayarak aralarındaki aralığı da seçebilirsiniz.",
 	[Key.calendarPrevMonth]: "Önceki ay",
 	[Key.calendarNextMonth]: "Sonraki ay",
 	[Key.calendarBackToday]: "Bugüne dön",

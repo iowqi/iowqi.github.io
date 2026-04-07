@@ -62,7 +62,7 @@ export const ko: Translation = {
 	[Key.year]: "년",
 	[Key.calendarClearFilter]: "날짜 필터 지우기",
 	[Key.calendarDragHint]:
-		"날짜를 드래그해 홈 글 목록을 기간으로 필터링합니다. 캘린더 위·아래로 벗어나면 월을 바꾸며 선택을 이어갈 수 있습니다.",
+		"날짜를 드래그해 홈 글 목록을 기간으로 필터링합니다. 캘린더 위·아래로 벗어나면 월을 바꾸며 선택을 이어갈 수 있습니다. 날짜를 한 번 클릭한 뒤 Shift를 누른 채 다른 날을 클릭해 그 사이 기간을 선택할 수도 있습니다.",
 	[Key.calendarPrevMonth]: "이전 달",
 	[Key.calendarNextMonth]: "다음 달",
 	[Key.calendarBackToday]: "오늘로",

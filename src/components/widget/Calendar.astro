@@ -49,7 +49,12 @@ const ariaNext = i18n(I18nKey.calendarNextMonth);
 const ariaToday = i18n(I18nKey.calendarBackToday);
 ---
 
-<WidgetLayout name={i18n(I18nKey.calendar)} id="calendar" class={className} style={style}>
+<WidgetLayout
+	name={i18n(I18nKey.calendar)}
+	id="calendar"
+	class={className}
+	style={style}
+>
 	<div class="calendar-container select-none relative">
 		<div class="flex justify-between items-center mb-2">
 			<button
@@ -96,21 +101,34 @@ const ariaToday = i18n(I18nKey.calendarBackToday);
 					))
 				}
 			</div>
-			<div class="calendar-grid grid grid-cols-7 gap-1 pb-1 touch-none" id="calendar-grid"></div>
+			<div
+				class="calendar-grid grid grid-cols-7 gap-1 pb-1 touch-none"
+				id="calendar-grid"
+			>
+			</div>
 		</div>
 
-		<div id="month-view-container" class="grid grid-cols-3 gap-2" style="display: none;"></div>
-		<div id="year-view-container" class="grid grid-cols-3 gap-2" style="display: none;"></div>
+		<div
+			id="month-view-container"
+			class="grid grid-cols-3 gap-2"
+			style="display: none;"
+		>
+		</div>
+		<div
+			id="year-view-container"
+			class="grid grid-cols-3 gap-2"
+			style="display: none;"
+		>
+		</div>
 
-		<div id="calendar-posts" class="mt-3">
+		<div id="calendar-posts" class="mt-3" style="display: none;">
 			<div
 				class="border-t border-neutral-200 dark:border-neutral-700 mb-2"
 				id="calendar-posts-divider"
-				style="display: none;"
 			>
 			</div>
 			<div
-				class="flex flex-col gap-1 max-h-48 overflow-y-auto custom-scrollbar"
+				class="calendar-posts-list-scroll flex flex-col gap-0.5 max-h-[calc(1.5rem*6)] overflow-y-auto overflow-x-hidden custom-scrollbar px-0.5"
 				id="calendar-posts-list"
 			>
 			</div>
@@ -119,7 +137,7 @@ const ariaToday = i18n(I18nKey.calendarBackToday);
 		<button
 			type="button"
 			id="calendar-clear-filter-btn"
-			class="calendar-clear-filter-btn mt-3 hidden w-full rounded-lg border border-transparent bg-[color-mix(in_oklch,var(--primary)_14%,transparent)] py-1.5 text-sm text-(--primary) transition-[background-color,border-color,box-shadow] duration-200 hover:bg-[color-mix(in_oklch,var(--primary)_28%,var(--card-bg))] hover:shadow-sm dark:bg-[color-mix(in_oklch,var(--primary)_18%,transparent)] dark:hover:bg-[color-mix(in_oklch,var(--primary)_32%,var(--card-bg))]"
+			class="calendar-clear-filter-btn mt-3 hidden w-full rounded-lg border border-transparent bg-[color-mix(in_oklch,var(--primary)_14%,transparent)] py-1.5 text-sm text-(--primary) transition-[background-color,border-color,box-shadow] duration-200 hover:bg-[color-mix(in_oklch,var(--primary)_28%,var(--card-bg))] hover:shadow-sm dark:bg-[color-mix(in_oklch,var(--primary)_80%,var(--card-bg))] dark:hover:bg-[color-mix(in_oklch,var(--primary)_100%,var(--card-bg))]"
 		>
 			{clearLabel}
 		</button>
@@ -151,6 +169,7 @@ const ariaToday = i18n(I18nKey.calendarBackToday);
 		postUrlPrefix,
 	}}
 >
+	/** 鼠标在日历内保持静止超过该时长后才显示提示 */
 	const CALENDAR_HINT_HOVER_MS = 650;
 	function toDateKeyFromIso(iso) {
 		const date = new Date(iso);
@@ -163,7 +182,8 @@ const ariaToday = i18n(I18nKey.calendarBackToday);
 	}
 
 	function normalizeRange(startKey, endKey) {
-		if (compareDateKeys(startKey, endKey) <= 0) return { start: startKey, end: endKey };
+		if (compareDateKeys(startKey, endKey) <= 0)
+			return { start: startKey, end: endKey };
 		return { start: endKey, end: startKey };
 	}
 
@@ -193,16 +213,25 @@ const ariaToday = i18n(I18nKey.calendarBackToday);
 		return el.getBoundingClientRect();
 	}
 
+	function todayDateKey() {
+		const n = new Date();
+		return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, "0")}-${String(n.getDate()).padStart(2, "0")}`;
+	}
+
 	let displayYear = new Date().getFullYear();
 	let displayMonth = new Date().getMonth();
 	let currentView = "day";
 	let postDateMap = {};
 	let allPostsData = [];
 	let availableYears = [];
+	/** 日历格上的焦点高亮日（拖选/Shift 延伸时为区间一端）；列表在存在已提交区间时显示区间内全部文章 */
+	let focusedDateKey = todayDateKey();
 
 	let isPointerSelecting = false;
 	let selectStartKey = null;
 	let selectCurrentKey = null;
+	/** 普通点击/拖选结束后区间的起始日，供 Shift+单击 延伸到另一日期 */
+	let shiftRangeAnchorKey = null;
 	let docPointerListenersActive = false;
 	/** 指针需移回日历区域内后，才允许下一次边缘自动换月，避免边界抖动连跳多个月 */
 	let crossMonthSwitchArmed = true;
@@ -231,7 +260,10 @@ const ariaToday = i18n(I18nKey.calendarBackToday);
 
 		const rect = getCalendarHitRect();
 		if (!rect) return;
-		if (e.clientX < rect.left - CALENDAR_EDGE_PX || e.clientX > rect.right + CALENDAR_EDGE_PX) {
+		if (
+			e.clientX < rect.left - CALENDAR_EDGE_PX ||
+			e.clientX > rect.right + CALENDAR_EDGE_PX
+		) {
 			bottomEdgeEnteredAt = null;
 			topEdgeEnteredAt = null;
 			return;
@@ -284,7 +316,9 @@ const ariaToday = i18n(I18nKey.calendarBackToday);
 	}
 
 	function applyHomePostListFilter() {
-		const cards = document.querySelectorAll("#posts-container .post-card-item");
+		const cards = document.querySelectorAll(
+			"#posts-container .post-card-item",
+		);
 		const container = getHomePostsContainer();
 		const range = window.__homeDateFilterRange;
 
@@ -292,7 +326,11 @@ const ariaToday = i18n(I18nKey.calendarBackToday);
 			cards.forEach((card) => {
 				card.classList.remove("hidden");
 				const next = card.nextElementSibling;
-				if (next && next.classList && next.classList.contains("post-card-mobile-divider")) {
+				if (
+					next &&
+					next.classList &&
+					next.classList.contains("post-card-mobile-divider")
+				) {
 					next.classList.remove("hidden");
 				}
 			});
@@ -308,10 +346,16 @@ const ariaToday = i18n(I18nKey.calendarBackToday);
 			const iso = card.getAttribute("data-published");
 			if (!iso) return;
 			const key = toDateKeyFromIso(iso);
-			const show = compareDateKeys(key, start) >= 0 && compareDateKeys(key, end) <= 0;
+			const show =
+				compareDateKeys(key, start) >= 0 &&
+				compareDateKeys(key, end) <= 0;
 			card.classList.toggle("hidden", !show);
 			const next = card.nextElementSibling;
-			if (next && next.classList && next.classList.contains("post-card-mobile-divider")) {
+			if (
+				next &&
+				next.classList &&
+				next.classList.contains("post-card-mobile-divider")
+			) {
 				next.classList.toggle("hidden", !show);
 			}
 		});
@@ -333,46 +377,66 @@ const ariaToday = i18n(I18nKey.calendarBackToday);
 		updateClearFilterButton();
 		applyHomePostListFilter();
 		updateRangeCellClasses();
-		refreshSidebarPostList();
+		renderSelectedDayPostList();
 	}
 
 	function clearCommittedRange() {
 		window.__homeDateFilterRange = null;
+		shiftRangeAnchorKey = null;
+		focusedDateKey = todayDateKey();
 		updateClearFilterButton();
 		applyHomePostListFilter();
 		updateRangeCellClasses();
-		const currentMonthPosts = allPostsData.filter((post) => {
-			const date = new Date(post.published);
-			return date.getFullYear() === displayYear && date.getMonth() === displayMonth;
-		});
-		showMonthlyPosts(currentMonthPosts);
+		renderSelectedDayPostList();
 	}
 
 	function updateRangeCellClasses() {
 		const range = window.__homeDateFilterRange;
 		document.querySelectorAll(".calendar-day[data-date]").forEach((el) => {
-			el.classList.remove("calendar-day-in-range", "calendar-day-range-preview");
+			el.classList.remove(
+				"calendar-day-in-range",
+				"calendar-day-range-preview",
+			);
 			const dk = el.getAttribute("data-date");
 			if (!dk) return;
 			if (range) {
 				const { start, end } = range;
-				if (compareDateKeys(dk, start) >= 0 && compareDateKeys(dk, end) <= 0) {
+				if (
+					compareDateKeys(dk, start) >= 0 &&
+					compareDateKeys(dk, end) <= 0
+				) {
 					el.classList.add("calendar-day-in-range");
 				}
 			}
 		});
+		updateFocusedDayHighlight();
+	}
+
+	function updateFocusedDayHighlight() {
+		document.querySelectorAll(".calendar-day[data-date]").forEach((el) => {
+			const dk = el.getAttribute("data-date");
+			el.classList.toggle(
+				"calendar-day-focus",
+				!!dk && dk === focusedDateKey,
+			);
+		});
 	}
 
 	function updatePreviewRangeClasses() {
-		document.querySelectorAll(".calendar-day-range-preview").forEach((el) => {
-			el.classList.remove("calendar-day-range-preview");
-		});
+		document
+			.querySelectorAll(".calendar-day-range-preview")
+			.forEach((el) => {
+				el.classList.remove("calendar-day-range-preview");
+			});
 		if (!isPointerSelecting || !selectStartKey || !selectCurrentKey) return;
 		const { start, end } = normalizeRange(selectStartKey, selectCurrentKey);
 		document.querySelectorAll(".calendar-day[data-date]").forEach((el) => {
 			const dk = el.getAttribute("data-date");
 			if (!dk) return;
-			if (compareDateKeys(dk, start) >= 0 && compareDateKeys(dk, end) <= 0) {
+			if (
+				compareDateKeys(dk, start) >= 0 &&
+				compareDateKeys(dk, end) <= 0
+			) {
 				el.classList.add("calendar-day-range-preview");
 			}
 		});
@@ -412,6 +476,7 @@ const ariaToday = i18n(I18nKey.calendarBackToday);
 				yearsSet.add(date.getFullYear());
 			});
 			availableYears = Array.from(yearsSet).sort((a, b) => b - a);
+			focusedDateKey = todayDateKey();
 			renderCalendar();
 		} catch (error) {
 			console.error("Failed to fetch calendar data", error);
@@ -424,12 +489,16 @@ const ariaToday = i18n(I18nKey.calendarBackToday);
 		const yearContainer = document.getElementById("year-view-container");
 		const postsContainer = document.getElementById("calendar-posts");
 
-		if (container) container.style.display = currentView === "day" ? "block" : "none";
+		if (container)
+			container.style.display = currentView === "day" ? "block" : "none";
 		if (monthContainer)
-			monthContainer.style.display = currentView === "month" ? "grid" : "none";
+			monthContainer.style.display =
+				currentView === "month" ? "grid" : "none";
 		if (yearContainer)
-			yearContainer.style.display = currentView === "year" ? "grid" : "none";
-		if (postsContainer) postsContainer.style.display = currentView === "day" ? "block" : "none";
+			yearContainer.style.display =
+				currentView === "year" ? "grid" : "none";
+		if (postsContainer && currentView !== "day")
+			postsContainer.style.display = "none";
 
 		updateHeader();
 
@@ -446,7 +515,10 @@ const ariaToday = i18n(I18nKey.calendarBackToday);
 
 		if (navDisplay) {
 			if (currentView === "day") {
-				if (currentLang.startsWith("zh") || currentLang.startsWith("ja")) {
+				if (
+					currentLang.startsWith("zh") ||
+					currentLang.startsWith("ja")
+				) {
 					navDisplay.textContent = `${displayYear}${yearText}${monthNames[displayMonth]}`;
 				} else {
 					navDisplay.textContent = `${monthNames[displayMonth]} ${displayYear}`;
@@ -461,12 +533,18 @@ const ariaToday = i18n(I18nKey.calendarBackToday);
 		if (resetBtn) {
 			const now = new Date();
 			const isCurrent =
-				displayYear === now.getFullYear() && displayMonth === now.getMonth();
-			resetBtn.style.display = currentView === "day" && isCurrent ? "none" : "flex";
+				displayYear === now.getFullYear() &&
+				displayMonth === now.getMonth();
+			resetBtn.style.display =
+				currentView === "day" && isCurrent ? "none" : "flex";
 		}
 
-		if (prevBtn) prevBtn.style.visibility = currentView === "year" ? "hidden" : "visible";
-		if (nextBtn) nextBtn.style.visibility = currentView === "year" ? "hidden" : "visible";
+		if (prevBtn)
+			prevBtn.style.visibility =
+				currentView === "year" ? "hidden" : "visible";
+		if (nextBtn)
+			nextBtn.style.visibility =
+				currentView === "year" ? "hidden" : "visible";
 	}
 
 	function renderDayView() {
@@ -475,16 +553,26 @@ const ariaToday = i18n(I18nKey.calendarBackToday);
 		const currentMonth = displayMonth;
 		const currentDate = now.getDate();
 		const isCurrentMonth =
-			currentYear === now.getFullYear() && currentMonth === now.getMonth();
+			currentYear === now.getFullYear() &&
+			currentMonth === now.getMonth();
 
 		const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
-		const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+		const daysInMonth = new Date(
+			currentYear,
+			currentMonth + 1,
+			0,
+		).getDate();
 		const calendarGrid = document.getElementById("calendar-grid");
 		if (!calendarGrid) return;
 
 		const calendarDays = [];
 		for (let i = 0; i < firstDayOfMonth; i++) {
-			calendarDays.push({ day: null, hasPost: false, count: 0, dateKey: "" });
+			calendarDays.push({
+				day: null,
+				hasPost: false,
+				count: 0,
+				dateKey: "",
+			});
 		}
 		for (let day = 1; day <= daysInMonth; day++) {
 			const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
@@ -500,72 +588,97 @@ const ariaToday = i18n(I18nKey.calendarBackToday);
 					"calendar-day aspect-square flex items-center justify-center rounded text-sm relative cursor-pointer",
 				];
 				if (!day) {
-					classes.push("pointer-events-none text-neutral-400 dark:text-neutral-600");
+					classes.push(
+						"pointer-events-none text-neutral-400 dark:text-neutral-600",
+					);
 				} else if (!hasPost) {
 					classes.push("text-neutral-700 dark:text-neutral-300");
 				} else {
-					classes.push("text-neutral-900 dark:text-neutral-100 font-bold");
+					classes.push(
+						"text-neutral-900 dark:text-neutral-100 font-bold",
+					);
 				}
 				if (isToday) classes.push("ring-2 ring-(--primary)");
+				const countBadge = hasPost
+					? `<span class="calendar-day-count pointer-events-none absolute top-0.5 right-0.5 text-[10px] font-bold leading-none tabular-nums">${count}</span>`
+					: "";
+				const dot = hasPost
+					? '<span class="calendar-day-hot-dot pointer-events-none absolute bottom-1 left-1/2 -translate-x-1/2 rounded-full" aria-hidden="true"></span>'
+					: "";
 				return `
         <div
           class="${classes.join(" ")}"
           data-date="${dateKey}"
           data-has-post="${hasPost}"
         >
+          ${countBadge}
           ${day || ""}
-          ${hasPost ? '<span class="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-(--primary)"></span>' : ""}
-          ${hasPost && count > 1 ? `<span class="absolute top-0 right-0 text-[10px] text-(--primary) font-bold">${count}</span>` : ""}
+          ${dot}
         </div>
       `;
 			})
 			.join("");
 
 		if (!isPointerSelecting) {
-			refreshSidebarPostList();
+			renderSelectedDayPostList();
 		}
 		updateRangeCellClasses();
 		updatePreviewRangeClasses();
 		bindCalendarGridPointerHandlers();
 	}
 
-	function refreshSidebarPostList() {
-		const range = window.__homeDateFilterRange;
-		if (range) {
-			const filtered = allPostsData.filter((post) => {
-				const k = toDateKeyFromIso(post.published);
-				return compareDateKeys(k, range.start) >= 0 && compareDateKeys(k, range.end) <= 0;
-			});
-			showPostsInList(filtered);
-			return;
-		}
-		const currentMonthPosts = allPostsData.filter((post) => {
-			const date = new Date(post.published);
-			return date.getFullYear() === displayYear && date.getMonth() === displayMonth;
-		});
-		showMonthlyPosts(currentMonthPosts);
-	}
-
-	function showPostsInList(posts) {
-		const postsWrapper = document.getElementById("calendar-posts");
+	function renderSelectedDayPostList() {
+		const root = document.getElementById("calendar-posts");
 		const postsList = document.getElementById("calendar-posts-list");
 		const divider = document.getElementById("calendar-posts-divider");
-		if (postsWrapper) postsWrapper.style.display = posts.length > 0 ? "block" : "none";
-		if (postsList) {
-			postsList.innerHTML = posts
-				.map((post) => {
-					const date = new Date(post.published);
-					const dateStr = `${date.getMonth() + 1}-${date.getDate()}`;
-					return `
-        <a href="${postUrlPrefix}${post.id}/" class="flex justify-between items-center text-sm text-neutral-700 dark:text-neutral-300 hover:text-(--primary) dark:hover:text-(--primary) transition-colors px-2 py-1 rounded hover:bg-(--btn-plain-bg-hover)">
-          <span class="truncate">${post.title}</span>
-          <span class="text-xs text-neutral-500 dark:text-neutral-400 ml-2 whitespace-nowrap">${dateStr}</span>
-        </a>
-      `;
-				})
-				.join("");
+		if (!root || !postsList || !divider) return;
+		if (currentView !== "day") return;
+
+		const range = window.__homeDateFilterRange;
+		let raw;
+		if (range) {
+			const { start, end } = range;
+			raw = [];
+			const seen = new Set();
+			for (const dateKey of Object.keys(postDateMap)) {
+				if (
+					compareDateKeys(dateKey, start) >= 0 &&
+					compareDateKeys(dateKey, end) <= 0
+				) {
+					for (const p of postDateMap[dateKey] || []) {
+						if (!seen.has(p.id)) {
+							seen.add(p.id);
+							raw.push(p);
+						}
+					}
+				}
+			}
+		} else {
+			raw = postDateMap[focusedDateKey] || [];
 		}
-		if (divider) divider.style.display = posts.length > 0 ? "block" : "none";
+
+		const posts = raw
+			.slice()
+			.sort(
+				(a, b) =>
+					new Date(a.published).getTime() -
+					new Date(b.published).getTime(),
+			);
+
+		if (posts.length === 0) {
+			root.style.display = "none";
+			postsList.innerHTML = "";
+			return;
+		}
+
+		root.style.display = "block";
+		postsList.innerHTML = posts
+			.map(
+				(post) => `
+        <a href="${postUrlPrefix}${post.id}/" class="calendar-post-list-link block truncate text-sm leading-6 text-neutral-700 dark:text-neutral-300 hover:text-(--primary) dark:hover:text-(--primary) mx-0.5 px-2 py-0.5 rounded-md">${post.title}</a>
+      `,
+			)
+			.join("");
 	}
 
 	function renderMonthView() {
@@ -574,7 +687,8 @@ const ariaToday = i18n(I18nKey.calendarBackToday);
 		const monthsWithPosts = new Set();
 		allPostsData.forEach((post) => {
 			const date = new Date(post.published);
-			if (date.getFullYear() === displayYear) monthsWithPosts.add(date.getMonth());
+			if (date.getFullYear() === displayYear)
+				monthsWithPosts.add(date.getMonth());
 		});
 		container.innerHTML = monthNames
 			.map((name, index) => {
@@ -584,12 +698,14 @@ const ariaToday = i18n(I18nKey.calendarBackToday);
 					"p-2 text-center text-sm rounded cursor-pointer hover:bg-(--btn-plain-bg-hover) transition-colors relative",
 				];
 				if (isCurrent) {
-					classes.push("text-(--primary) font-bold bg-(--btn-plain-bg-hover)");
+					classes.push(
+						"text-(--primary) font-bold bg-(--btn-plain-bg-hover)",
+					);
 				} else {
 					classes.push("text-neutral-700 dark:text-neutral-300");
 				}
 				const dotHtml = hasPost
-					? '<span class="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-(--primary)"></span>'
+					? '<span class="calendar-day-hot-dot absolute bottom-1 left-1/2 -translate-x-1/2 rounded-full"></span>'
 					: "";
 				return `<div class="${classes.join(" ")}" data-month="${index}">${name}${dotHtml}</div>`;
 			})
@@ -613,12 +729,14 @@ const ariaToday = i18n(I18nKey.calendarBackToday);
 					"p-2 text-center text-sm rounded cursor-pointer hover:bg-(--btn-plain-bg-hover) transition-colors relative",
 				];
 				if (isCurrent) {
-					classes.push("text-(--primary) font-bold bg-(--btn-plain-bg-hover)");
+					classes.push(
+						"text-(--primary) font-bold bg-(--btn-plain-bg-hover)",
+					);
 				} else {
 					classes.push("text-neutral-700 dark:text-neutral-300");
 				}
 				const dotHtml =
-					'<span class="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-(--primary)"></span>';
+					'<span class="calendar-day-hot-dot absolute bottom-1 left-1/2 -translate-x-1/2 rounded-full"></span>';
 				return `<div class="${classes.join(" ")}" data-year="${year}">${year}${dotHtml}</div>`;
 			})
 			.join("");
@@ -631,24 +749,44 @@ const ariaToday = i18n(I18nKey.calendarBackToday);
 		});
 	}
 
-	function showMonthlyPosts(currentMonthPosts) {
-		showPostsInList(currentMonthPosts);
-	}
-
 	function attachDocumentPointerListeners() {
 		if (docPointerListenersActive) return;
 		docPointerListenersActive = true;
-		document.addEventListener("pointermove", handlePointerMoveWhileSelecting, true);
-		document.addEventListener("pointerup", handlePointerEndWhileSelecting, true);
-		document.addEventListener("pointercancel", handlePointerEndWhileSelecting, true);
+		document.addEventListener(
+			"pointermove",
+			handlePointerMoveWhileSelecting,
+			true,
+		);
+		document.addEventListener(
+			"pointerup",
+			handlePointerEndWhileSelecting,
+			true,
+		);
+		document.addEventListener(
+			"pointercancel",
+			handlePointerEndWhileSelecting,
+			true,
+		);
 	}
 
 	function detachDocumentPointerListeners() {
 		if (!docPointerListenersActive) return;
 		docPointerListenersActive = false;
-		document.removeEventListener("pointermove", handlePointerMoveWhileSelecting, true);
-		document.removeEventListener("pointerup", handlePointerEndWhileSelecting, true);
-		document.removeEventListener("pointercancel", handlePointerEndWhileSelecting, true);
+		document.removeEventListener(
+			"pointermove",
+			handlePointerMoveWhileSelecting,
+			true,
+		);
+		document.removeEventListener(
+			"pointerup",
+			handlePointerEndWhileSelecting,
+			true,
+		);
+		document.removeEventListener(
+			"pointercancel",
+			handlePointerEndWhileSelecting,
+			true,
+		);
 	}
 
 	function endPointerSelect() {
@@ -658,11 +796,16 @@ const ariaToday = i18n(I18nKey.calendarBackToday);
 		bottomEdgeEnteredAt = null;
 		topEdgeEnteredAt = null;
 		detachDocumentPointerListeners();
-		document.querySelectorAll(".calendar-day-range-preview").forEach((el) => {
-			el.classList.remove("calendar-day-range-preview");
-		});
+		document
+			.querySelectorAll(".calendar-day-range-preview")
+			.forEach((el) => {
+				el.classList.remove("calendar-day-range-preview");
+			});
 		if (selectStartKey && selectCurrentKey) {
+			focusedDateKey = selectCurrentKey;
 			setCommittedRange(selectStartKey, selectCurrentKey);
+			const { start } = normalizeRange(selectStartKey, selectCurrentKey);
+			shiftRangeAnchorKey = start;
 		}
 		selectStartKey = null;
 		selectCurrentKey = null;
@@ -679,6 +822,12 @@ const ariaToday = i18n(I18nKey.calendarBackToday);
 			if (!cell) return;
 			const dk = cell.getAttribute("data-date");
 			if (!dk) return;
+			if (e.shiftKey && shiftRangeAnchorKey) {
+				e.preventDefault();
+				focusedDateKey = dk;
+				setCommittedRange(shiftRangeAnchorKey, dk);
+				return;
+			}
 			isPointerSelecting = true;
 			crossMonthSwitchArmed = true;
 			bottomEdgeEnteredAt = null;
@@ -705,6 +854,7 @@ const ariaToday = i18n(I18nKey.calendarBackToday);
 		displayYear = now.getFullYear();
 		displayMonth = now.getMonth();
 		currentView = "day";
+		focusedDateKey = todayDateKey();
 		renderCalendar();
 	}
 
@@ -712,7 +862,7 @@ const ariaToday = i18n(I18nKey.calendarBackToday);
 		const root = document.querySelector(".calendar-container");
 		const pop = document.getElementById("calendar-hint-popover");
 		if (!root || !pop) return;
-		let timer = null;
+		let idleTimer = null;
 		const show = () => {
 			pop.classList.remove("opacity-0", "invisible", "translate-y-0");
 			pop.classList.add("opacity-100", "visible", "-translate-y-0.5");
@@ -723,18 +873,26 @@ const ariaToday = i18n(I18nKey.calendarBackToday);
 			pop.classList.remove("opacity-100", "visible", "-translate-y-0.5");
 			pop.setAttribute("aria-hidden", "true");
 		};
-		const clearTimer = () => {
-			if (timer) {
-				clearTimeout(timer);
-				timer = null;
+		const clearIdleTimer = () => {
+			if (idleTimer) {
+				clearTimeout(idleTimer);
+				idleTimer = null;
 			}
 		};
+		const scheduleShowAfterIdle = () => {
+			clearIdleTimer();
+			idleTimer = setTimeout(show, CALENDAR_HINT_HOVER_MS);
+		};
 		root.addEventListener("mouseenter", () => {
-			clearTimer();
-			timer = setTimeout(show, CALENDAR_HINT_HOVER_MS);
+			hide();
+			scheduleShowAfterIdle();
+		});
+		root.addEventListener("mousemove", () => {
+			hide();
+			scheduleShowAfterIdle();
 		});
 		root.addEventListener("mouseleave", () => {
-			clearTimer();
+			clearIdleTimer();
 			hide();
 		});
 	}
@@ -799,25 +957,87 @@ const ariaToday = i18n(I18nKey.calendarBackToday);
 		transform: translateY(-2px);
 	}
 
+	:global(.calendar-day-hot-dot) {
+		width: 0.3125rem;
+		height: 0.3125rem;
+		background-color: var(--primary);
+	}
+
+	:global(.calendar-day-count) {
+		color: color-mix(in oklch, var(--primary) 72%, black 28%);
+	}
+
+	:global(html.dark .calendar-day-count) {
+		color: color-mix(in oklch, var(--primary) 88%, white 12%);
+	}
+
+	:global(a.calendar-post-list-link) {
+		transition:
+			color 0.2s ease,
+			box-shadow 0.2s ease;
+		box-shadow: inset 0 0 0 2px transparent;
+	}
+
+	:global(a.calendar-post-list-link:hover) {
+		box-shadow: inset 0 0 0 2px
+			color-mix(in oklch, var(--primary) 48%, transparent);
+	}
+
+	:global(html.dark a.calendar-post-list-link:hover) {
+		box-shadow: inset 0 0 0 2px
+			color-mix(in oklch, var(--primary) 58%, transparent);
+	}
+
 	:global(.calendar-day-in-range) {
 		border-radius: 0.25rem;
-		background-color: color-mix(in oklch, var(--primary) 28%, var(--card-bg));
-		box-shadow: inset 0 0 0 2px color-mix(in oklch, var(--primary) 52%, transparent);
+		background-color: color-mix(
+			in oklch,
+			var(--primary) 28%,
+			var(--card-bg)
+		);
+		box-shadow: inset 0 0 0 2px
+			color-mix(in oklch, var(--primary) 52%, transparent);
 	}
 
 	:global(html.dark .calendar-day-in-range) {
-		background-color: color-mix(in oklch, var(--primary) 36%, var(--card-bg));
-		box-shadow: inset 0 0 0 2px color-mix(in oklch, var(--primary) 68%, transparent);
+		background-color: color-mix(
+			in oklch,
+			var(--primary) 36%,
+			var(--card-bg)
+		);
+		box-shadow: inset 0 0 0 2px
+			color-mix(in oklch, var(--primary) 68%, transparent);
 	}
 
 	:global(.calendar-day-range-preview) {
 		border-radius: 0.25rem;
-		background-color: color-mix(in oklch, var(--primary) 16%, var(--card-bg));
-		box-shadow: inset 0 0 0 1.5px color-mix(in oklch, var(--primary) 40%, transparent);
+		background-color: color-mix(
+			in oklch,
+			var(--primary) 16%,
+			var(--card-bg)
+		);
+		box-shadow: inset 0 0 0 1.5px
+			color-mix(in oklch, var(--primary) 40%, transparent);
+	}
+
+	:global(.calendar-day-focus) {
+		z-index: 1;
+		outline: 2px solid color-mix(in oklch, var(--primary) 58%, transparent);
+		outline-offset: -2px;
+		border-radius: 0.25rem;
+	}
+
+	:global(html.dark .calendar-day-focus) {
+		outline-color: color-mix(in oklch, var(--primary) 68%, transparent);
 	}
 
 	:global(html.dark .calendar-day-range-preview) {
-		background-color: color-mix(in oklch, var(--primary) 22%, var(--card-bg));
-		box-shadow: inset 0 0 0 1.5px color-mix(in oklch, var(--primary) 55%, transparent);
+		background-color: color-mix(
+			in oklch,
+			var(--primary) 22%,
+			var(--card-bg)
+		);
+		box-shadow: inset 0 0 0 1.5px
+			color-mix(in oklch, var(--primary) 55%, transparent);
 	}
 </style>

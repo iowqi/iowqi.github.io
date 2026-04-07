@@ -62,7 +62,7 @@ export const id: Translation = {
 	[Key.year]: "",
 	[Key.calendarClearFilter]: "Hapus filter tanggal",
 	[Key.calendarDragHint]:
-		"Seret di tanggal untuk menyaring daftar pos di beranda. Keluar dari atas/bawah kalender untuk pindah bulan sambil memilih.",
+		"Seret di tanggal untuk menyaring daftar pos di beranda. Keluar dari atas/bawah kalender untuk pindah bulan sambil memilih. Anda juga bisa klik sebuah tanggal, lalu Shift+klik tanggal lain untuk memilih rentang di antaranya.",
 	[Key.calendarPrevMonth]: "Bulan sebelumnya",
 	[Key.calendarNextMonth]: "Bulan berikutnya",
 	[Key.calendarBackToday]: "Kembali ke hari ini",

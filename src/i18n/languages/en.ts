@@ -62,7 +62,7 @@ export const en: Translation = {
 	[Key.year]: "",
 	[Key.calendarClearFilter]: "Clear date filter",
 	[Key.calendarDragHint]:
-		"Drag across dates to filter the home post list. Drag past the top or bottom of the calendar to change months while selecting.",
+		"Drag across dates to filter the home post list. Drag past the top or bottom of the calendar to change months while selecting. You can also click a date, then Shift+click another to select the range between them.",
 	[Key.calendarPrevMonth]: "Previous month",
 	[Key.calendarNextMonth]: "Next month",
 	[Key.calendarBackToday]: "Back to today",

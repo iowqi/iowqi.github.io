@@ -62,7 +62,7 @@ export const ja: Translation = {
 	[Key.year]: "年",
 	[Key.calendarClearFilter]: "日付フィルターを解除",
 	[Key.calendarDragHint]:
-		"日付をドラッグしてホームの記事一覧を期間で絞り込めます。カレンダーの上下はみ出しで月を切り替えながら選択できます。",
+		"日付をドラッグしてホームの記事一覧を期間で絞り込めます。カレンダーの上下はみ出しで月を切り替えながら選択できます。日付を一度クリックし、Shift を押したまま別の日をクリックして、その間の期間を選ぶこともできます。",
 	[Key.calendarPrevMonth]: "前の月",
 	[Key.calendarNextMonth]: "次の月",
 	[Key.calendarBackToday]: "今月へ",

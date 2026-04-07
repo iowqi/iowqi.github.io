@@ -62,7 +62,7 @@ export const es: Translation = {
 	[Key.year]: "",
 	[Key.calendarClearFilter]: "Quitar filtro de fechas",
 	[Key.calendarDragHint]:
-		"Arrastra sobre las fechas para filtrar la lista en la página principal. Sal por arriba o abajo del calendario para cambiar de mes mientras seleccionas.",
+		"Arrastra sobre las fechas para filtrar la lista en la página principal. Sal por arriba o abajo del calendario para cambiar de mes mientras seleccionas. También puedes hacer clic en una fecha y, con Mayús pulsado, en otra para seleccionar el intervalo entre ellas.",
 	[Key.calendarPrevMonth]: "Mes anterior",
 	[Key.calendarNextMonth]: "Mes siguiente",
 	[Key.calendarBackToday]: "Volver a hoy",

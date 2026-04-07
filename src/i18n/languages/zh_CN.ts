@@ -62,7 +62,7 @@ export const zh_CN: Translation = {
 	[Key.year]: "年",
 	[Key.calendarClearFilter]: "清除日期筛选",
 	[Key.calendarDragHint]:
-		"在日期上拖动可选中区间以筛选主页文章；拖动时移出日历上沿或下沿可切换月份并延续选择。",
+		"在日期上拖动可选中区间以筛选主页文章；拖动时移出日历上沿或下沿可切换月份并延续选择。也可先单击一天，再按住 Shift 单击另一天，选中这两天之间的区间。",
 	[Key.calendarPrevMonth]: "上一月",
 	[Key.calendarNextMonth]: "下一月",
 	[Key.calendarBackToday]: "回到今天",
