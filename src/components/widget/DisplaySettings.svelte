@@ -2,18 +2,32 @@
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
 import Icon from "@iconify/svelte";
-import { getDefaultHue, getHue, setHue } from "@utils/setting-utils";
+import {
+	getDefaultHue,
+	getHue,
+	getPostLayoutMode,
+	setHue,
+	setPostLayoutMode,
+	type PostLayoutMode,
+} from "@utils/setting-utils";
 
 let hue = getHue();
+let postLayoutMode: PostLayoutMode = getPostLayoutMode();
 const defaultHue = getDefaultHue();
 
 function resetHue() {
 	hue = getDefaultHue();
 }
 
+function setLayoutMode(mode: PostLayoutMode) {
+	postLayoutMode = mode;
+}
+
 $: if (hue || hue === 0) {
 	setHue(hue);
 }
+
+$: setPostLayoutMode(postLayoutMode);
 </script>
 
 <div id="display-setting" class="float-panel float-panel-closed absolute transition-all w-80 right-4 px-4 py-4">
@@ -40,6 +54,32 @@ $: if (hue || hue === 0) {
     <div class="w-full h-6 px-1 bg-[oklch(0.80_0.10_0)] dark:bg-[oklch(0.70_0.10_0)] rounded select-none">
         <input aria-label={i18n(I18nKey.themeColor)} type="range" min="0" max="360" bind:value={hue}
                class="slider" id="colorSlider" step="5" style="width: 100%">
+    </div>
+
+    <div class="mt-4">
+        <div class="font-bold text-sm text-neutral-900 dark:text-neutral-100 mb-2">{i18n(I18nKey.postLayout)}</div>
+        <div class="grid grid-cols-2 gap-2">
+            <button
+                aria-label={i18n(I18nKey.postLayoutList)}
+                class="btn-regular h-10 rounded-lg px-3 flex items-center justify-center gap-2 transition"
+                class:!bg-[var(--primary)]={postLayoutMode === "list"}
+                class:!text-white={postLayoutMode === "list"}
+                on:click={() => setLayoutMode("list")}
+            >
+                <Icon icon="mdi:format-list-bulleted" class="text-lg" />
+                <span class="text-sm font-medium">{i18n(I18nKey.postLayoutList)}</span>
+            </button>
+            <button
+                aria-label={i18n(I18nKey.postLayoutGrid)}
+                class="btn-regular h-10 rounded-lg px-3 flex items-center justify-center gap-2 transition"
+                class:!bg-[var(--primary)]={postLayoutMode === "grid"}
+                class:!text-white={postLayoutMode === "grid"}
+                on:click={() => setLayoutMode("grid")}
+            >
+                <Icon icon="material-symbols:grid-view-outline-rounded" class="text-lg" />
+                <span class="text-sm font-medium">{i18n(I18nKey.postLayoutGrid)}</span>
+            </button>
+        </div>
     </div>
 </div>
 

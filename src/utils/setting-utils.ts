@@ -7,6 +7,8 @@ import {
 import { expressiveCodeConfig, siteConfig } from "@/config";
 import type { LIGHT_DARK_MODE, SiteConfig } from "@/types/config";
 
+export type PostLayoutMode = "list" | "grid";
+
 export function getDefaultHue(): number {
 	const fallback = "250";
 	const configCarrier = document.getElementById("config-carrier");
@@ -73,4 +75,18 @@ export function getLang(): SiteConfig["lang"] {
 
 export function setLang(lang: SiteConfig["lang"]): void {
 	localStorage.setItem("lang", lang);
+}
+
+export function getPostLayoutMode(): PostLayoutMode {
+	const stored = localStorage.getItem("post-layout-mode");
+	return stored === "grid" ? "grid" : "list";
+}
+
+export function setPostLayoutMode(layout: PostLayoutMode): void {
+	localStorage.setItem("post-layout-mode", layout);
+	document.documentElement.dataset.postLayout = layout;
+}
+
+export function applyPostLayoutModeToDocument(layout: PostLayoutMode): void {
+	document.documentElement.dataset.postLayout = layout;
 }

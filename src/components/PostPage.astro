@@ -8,7 +8,7 @@ const { page } = Astro.props;
 let delay = 0;
 const interval = 50;
 ---
-<div class="transition flex flex-col rounded-[var(--radius-large)] bg-[var(--card-bg)] py-1 md:py-0 md:bg-transparent md:gap-4 mb-4">
+<div id="posts-container" class="transition rounded-[var(--radius-large)] bg-[var(--card-bg)] py-1 md:py-0 md:bg-transparent mb-4">
     {page.data.map((entry: CollectionEntry<"posts">) => (
         <PostCard
                 entry={entry}
@@ -21,8 +21,22 @@ const interval = 50;
                 image={entry.data.image}
                 description={entry.data.description}
                 draft={entry.data.draft}
-                class:list="onload-animation"
+                class:list="onload-animation post-card-item"
                 style={`animation-delay: calc(var(--content-delay) + ${delay++ * interval}ms);`}
         ></PostCard>
     ))}
 </div>
+
+<style is:global>
+	#posts-container {
+		@apply flex flex-col md:gap-4;
+	}
+
+	html[data-post-layout="grid"] #posts-container {
+		@apply block md:columns-2 md:gap-4;
+	}
+
+	html[data-post-layout="grid"] #posts-container .post-card-item {
+		@apply mb-4 break-inside-avoid;
+	}
+</style>

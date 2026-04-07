@@ -163,6 +163,10 @@ const bannerOffset =
 			const hue = localStorage.getItem("hue") || configHue;
 			document.documentElement.style.setProperty("--hue", hue);
 
+			// Load post list layout mode from local storage
+			const postLayoutMode = localStorage.getItem("post-layout-mode") || "list";
+			document.documentElement.dataset.postLayout = postLayoutMode === "grid" ? "grid" : "list";
+
 			// calculate the --banner-height-extend, which needs to be a multiple of 4 to avoid blurry text
 			let offset = Math.floor(
 				window.innerHeight * (BANNER_HEIGHT_EXTEND / 100),
@@ -273,7 +277,9 @@ const bannerOffset =
 		// ClickScrollPlugin
 	} from "overlayscrollbars";
 	import {
+		applyPostLayoutModeToDocument,
 		getHue,
+		getPostLayoutMode,
 		getStoredTheme,
 		setHue,
 		setTheme,
@@ -893,6 +899,10 @@ function disableAnimation() {
 		setHue(getHue());
 	}
 
+	function loadPostLayoutMode() {
+		applyPostLayoutModeToDocument(getPostLayoutMode());
+	}
+
 	function initCustomScrollbar() {
 		const bodyElement = document.querySelector("body");
 		if (!bodyElement) return;
@@ -981,6 +991,7 @@ function disableAnimation() {
 		// disableAnimation()()		// TODO
 		loadTheme();
 		loadHue();
+		loadPostLayoutMode();
 		generateBackgroundPattern();
 		initCustomScrollbar();
 		showBanner();

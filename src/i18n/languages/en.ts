@@ -25,6 +25,9 @@ export const en: Translation = {
 	[Key.postsCount]: "posts",
 
 	[Key.themeColor]: "Theme Color",
+	[Key.postLayout]: "Post Layout",
+	[Key.postLayoutList]: "List",
+	[Key.postLayoutGrid]: "Grid",
 
 	[Key.lightMode]: "Light",
 	[Key.darkMode]: "Dark",

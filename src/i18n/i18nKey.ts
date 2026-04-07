@@ -22,6 +22,9 @@ enum I18nKey {
 	postsCount = "postsCount",
 
 	themeColor = "themeColor",
+	postLayout = "postLayout",
+	postLayoutList = "postLayoutList",
+	postLayoutGrid = "postLayoutGrid",
 
 	lightMode = "lightMode",
 	darkMode = "darkMode",
