@@ -8,7 +8,7 @@ const { page } = Astro.props;
 let delay = 0;
 const interval = 50;
 ---
-<div id="posts-container" class="transition rounded-[var(--radius-large)] bg-[var(--card-bg)] py-1 md:py-0 md:bg-transparent mb-4">
+<div id="posts-container" data-home-post-list class="transition rounded-[var(--radius-large)] bg-[var(--card-bg)] py-1 md:py-0 md:bg-transparent mb-4">
     {page.data.map((entry: CollectionEntry<"posts">) => (
         <PostCard
                 entry={entry}

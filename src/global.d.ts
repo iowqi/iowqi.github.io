@@ -3,7 +3,12 @@ import type { AstroIntegration } from "@swup/astro";
 declare global {
 	interface Window {
 		// type from '@swup/astro' is incorrect
-		swup: AstroIntegration;
+		swup: AstroIntegration & {
+			hooks?: { on: (name: string, handler: () => void) => void };
+		};
+		__allPostMetaCache?: Array<{ id: string; title: string; published: string }>;
+		__homeDateFilterRange?: { start: string; end: string } | null;
+		__calendarSwupHooked?: boolean;
 		pagefind: {
 			search: (query: string) => Promise<{
 				results: Array<{

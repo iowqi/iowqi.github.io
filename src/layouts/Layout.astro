@@ -164,8 +164,10 @@ const bannerOffset =
 			document.documentElement.style.setProperty("--hue", hue);
 
 			// Load post list layout mode from local storage
-			const postLayoutMode = localStorage.getItem("post-layout-mode") || "list";
-			document.documentElement.dataset.postLayout = postLayoutMode === "grid" ? "grid" : "list";
+			const postLayoutMode =
+				localStorage.getItem("post-layout-mode") || "list";
+			document.documentElement.dataset.postLayout =
+				postLayoutMode === "grid" ? "grid" : "list";
 
 			// calculate the --banner-height-extend, which needs to be a multiple of 4 to avoid blurry text
 			let offset = Math.floor(
@@ -286,9 +288,9 @@ const bannerOffset =
 	} from "../utils/setting-utils";
 	import {
 		isHomePath,
-		pathsEqual,
-		stripLangPrefix,
-		url,
+		// pathsEqual,
+		// stripLangPrefix,
+		// url,
 	} from "../utils/url-utils";
 	import {
 		BANNER_HEIGHT,
