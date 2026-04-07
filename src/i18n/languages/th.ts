@@ -39,7 +39,7 @@ export const th: Translation = {
 	[Key.publishedAt]: "เผยแพร่เมื่อ",
 	[Key.license]: "สัญญาอนุญาต",
 
-	[Key.calendar]: "ปฏิทิน",
+	[Key.calendar]: "วันที่",
 	[Key.calendarJanuary]: "ม.ค.",
 	[Key.calendarFebruary]: "ก.พ.",
 	[Key.calendarMarch]: "มี.ค.",

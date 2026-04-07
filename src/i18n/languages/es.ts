@@ -39,7 +39,7 @@ export const es: Translation = {
 	[Key.publishedAt]: "Publicado el",
 	[Key.license]: "Licencia",
 
-	[Key.calendar]: "Calendario",
+	[Key.calendar]: "Fecha",
 	[Key.calendarJanuary]: "Enero",
 	[Key.calendarFebruary]: "Febrero",
 	[Key.calendarMarch]: "Marzo",

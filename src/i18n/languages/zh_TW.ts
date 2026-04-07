@@ -39,7 +39,7 @@ export const zh_TW: Translation = {
 	[Key.publishedAt]: "發佈於",
 	[Key.license]: "許可協議",
 
-	[Key.calendar]: "日曆",
+	[Key.calendar]: "日期",
 	[Key.calendarJanuary]: "一月",
 	[Key.calendarFebruary]: "二月",
 	[Key.calendarMarch]: "三月",

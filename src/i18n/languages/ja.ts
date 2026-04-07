@@ -39,7 +39,7 @@ export const ja: Translation = {
 	[Key.publishedAt]: "公開日",
 	[Key.license]: "ライセンス",
 
-	[Key.calendar]: "カレンダー",
+	[Key.calendar]: "日付",
 	[Key.calendarJanuary]: "1月",
 	[Key.calendarFebruary]: "2月",
 	[Key.calendarMarch]: "3月",

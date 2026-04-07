@@ -39,7 +39,7 @@ export const tr: Translation = {
 	[Key.publishedAt]: "Yayınlanma:",
 	[Key.license]: "Lisans",
 
-	[Key.calendar]: "Takvim",
+	[Key.calendar]: "Tarih",
 	[Key.calendarJanuary]: "Ocak",
 	[Key.calendarFebruary]: "Şubat",
 	[Key.calendarMarch]: "Mart",

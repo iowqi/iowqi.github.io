@@ -39,7 +39,7 @@ export const ko: Translation = {
 	[Key.publishedAt]: "게시일",
 	[Key.license]: "라이선스",
 
-	[Key.calendar]: "캘린더",
+	[Key.calendar]: "날짜",
 	[Key.calendarJanuary]: "1월",
 	[Key.calendarFebruary]: "2월",
 	[Key.calendarMarch]: "3월",

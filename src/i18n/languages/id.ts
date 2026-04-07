@@ -39,7 +39,7 @@ export const id: Translation = {
 	[Key.publishedAt]: "Diterbitkan pada",
 	[Key.license]: "Lisensi",
 
-	[Key.calendar]: "Kalender",
+	[Key.calendar]: "Tanggal",
 	[Key.calendarJanuary]: "Jan",
 	[Key.calendarFebruary]: "Feb",
 	[Key.calendarMarch]: "Mar",

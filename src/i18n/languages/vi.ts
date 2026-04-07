@@ -39,7 +39,7 @@ export const vi: Translation = {
 	[Key.publishedAt]: "Đăng vào lúc",
 	[Key.license]: "Giấy phép bản quyền",
 
-	[Key.calendar]: "Lịch",
+	[Key.calendar]: "Ngày",
 	[Key.calendarJanuary]: "Tháng 1",
 	[Key.calendarFebruary]: "Tháng 2",
 	[Key.calendarMarch]: "Tháng 3",
