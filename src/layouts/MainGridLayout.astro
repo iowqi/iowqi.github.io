@@ -196,7 +196,7 @@ const bannerWelcomeConfig = {
         >
             <div
                 id="main-grid"
-                class="transition duration-700 w-full left-0 right-0 grid grid-cols-[17.5rem_auto] grid-rows-[auto_1fr_auto] lg:grid-rows-[auto_auto]
+                class="transition duration-700 w-full left-0 right-0 grid grid-cols-[17.5rem_auto] grid-rows-[auto_1fr_auto] lg:grid-rows-[auto]
     mx-auto gap-4 px-0 md:px-4"
             >
                 <!-- Banner image credit -->
@@ -245,18 +245,19 @@ const bannerWelcomeConfig = {
 
                 <main
                     id="swup-container"
-                    class="transition-swup-fade col-span-2 lg:col-span-1 lg:row-start-1 lg:row-end-2 overflow-visible"
+                    class="transition-swup-fade col-span-2 lg:col-span-1 overflow-visible"
                 >
                     <div id="content-wrapper" class="onload-animation">
+                        <!-- the overflow-hidden here prevent long text break the layout-->
+                        <!-- make id different from windows.swup global property -->
                         <slot />
+                        <div
+                            class="footer col-span-2 onload-animation hidden lg:block"
+                        >
+                            <Footer />
+                        </div>
                     </div>
                 </main>
-
-                <div
-                    class="footer col-span-2 onload-animation hidden lg:block lg:row-start-2 lg:col-span-2"
-                >
-                    <Footer />
-                </div>
 
                 <div class="footer col-span-2 onload-animation block lg:hidden">
                     <Footer />
