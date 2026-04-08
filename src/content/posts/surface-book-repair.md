@@ -2,7 +2,7 @@
 title: 我的第一台笔记本 Surface Book
 published: 2022-12-01
 updated: 2025-07-03
-description: 'Surface Book 电池更换 + 散热改装：从「能用」到「真能打」的折腾记录'
+description: '一次surface book的维修和散热改装记录'
 image: 'https://cdn.jsdelivr.net/gh/iowqi/iowqi.github.io/src/content/img/IMG20221119013816.jpg'
 tags: [维修]
 category: 生活记录
