@@ -13,6 +13,10 @@ import {
 	BANNER_HEIGHT_EXTEND,
 	MAIN_PANEL_OVERLAPS_BANNER_HEIGHT,
 } from "../constants/constants";
+import {
+	extractLangFromPath,
+	normalizeLang,
+} from "@i18n/translation";
 import { isHomePath } from "../utils/url-utils";
 import Layout from "./Layout.astro";
 
@@ -87,6 +91,10 @@ const bannerWelcomeConfig = {
 };
 
 const showBannerWelcomeOnLoad = isHomePath(Astro.url.pathname);
+
+const resolvedPageLang = normalizeLang(
+	lang || extractLangFromPath(Astro.url.pathname) || siteConfig.lang,
+);
 ---
 
 <Layout
@@ -248,6 +256,7 @@ const showBannerWelcomeOnLoad = isHomePath(Astro.url.pathname);
                 <SideBar
                     class="mb-4 row-start-2 row-end-3 col-span-2 lg:row-start-1 lg:row-end-2 lg:col-span-1 lg:max-w-[17.5rem] onload-animation"
                     headings={headings}
+                    lang={resolvedPageLang}
                 />
 
                 <main

@@ -3,57 +3,68 @@ import { Icon } from "astro-icon/components";
 import WidgetLayout from "@/components/widget/WidgetLayout.astro";
 import { siteConfig } from "@/config";
 import I18nKey from "@/i18n/i18nKey";
-import { i18n } from "@/i18n/translation";
+import {
+	extractLangFromPath,
+	getTranslation,
+	normalizeLang,
+} from "@/i18n/translation";
 import { url } from "@/utils/url-utils";
 
 interface Props {
 	class?: string;
 	style?: string;
+	lang?: string;
 }
 
-const { class: className, style } = Astro.props;
+const { class: className, style, lang: langProp } = Astro.props;
+
+const pageLang = normalizeLang(
+	langProp || extractLangFromPath(Astro.url.pathname) || siteConfig.lang,
+);
+const t = getTranslation(pageLang);
 
 const monthNames = [
-	i18n(I18nKey.calendarJanuary),
-	i18n(I18nKey.calendarFebruary),
-	i18n(I18nKey.calendarMarch),
-	i18n(I18nKey.calendarApril),
-	i18n(I18nKey.calendarMay),
-	i18n(I18nKey.calendarJune),
-	i18n(I18nKey.calendarJuly),
-	i18n(I18nKey.calendarAugust),
-	i18n(I18nKey.calendarSeptember),
-	i18n(I18nKey.calendarOctober),
-	i18n(I18nKey.calendarNovember),
-	i18n(I18nKey.calendarDecember),
+	t[I18nKey.calendarJanuary],
+	t[I18nKey.calendarFebruary],
+	t[I18nKey.calendarMarch],
+	t[I18nKey.calendarApril],
+	t[I18nKey.calendarMay],
+	t[I18nKey.calendarJune],
+	t[I18nKey.calendarJuly],
+	t[I18nKey.calendarAugust],
+	t[I18nKey.calendarSeptember],
+	t[I18nKey.calendarOctober],
+	t[I18nKey.calendarNovember],
+	t[I18nKey.calendarDecember],
 ];
 
 const weekDays = [
-	i18n(I18nKey.calendarSunday),
-	i18n(I18nKey.calendarMonday),
-	i18n(I18nKey.calendarTuesday),
-	i18n(I18nKey.calendarWednesday),
-	i18n(I18nKey.calendarThursday),
-	i18n(I18nKey.calendarFriday),
-	i18n(I18nKey.calendarSaturday),
+	t[I18nKey.calendarSunday],
+	t[I18nKey.calendarMonday],
+	t[I18nKey.calendarTuesday],
+	t[I18nKey.calendarWednesday],
+	t[I18nKey.calendarThursday],
+	t[I18nKey.calendarFriday],
+	t[I18nKey.calendarSaturday],
 ];
 
-const yearText = i18n(I18nKey.year);
-const currentLang = siteConfig.lang || "en";
+const yearText = t[I18nKey.year];
+const currentLang = pageLang;
 const calendarDataUrl = url("/api/allPostMeta.json");
 const postUrlPrefix = url("/posts/");
-const dragHint = i18n(I18nKey.calendarDragHint);
-const clearLabel = i18n(I18nKey.calendarClearFilter);
-const ariaPrev = i18n(I18nKey.calendarPrevMonth);
-const ariaNext = i18n(I18nKey.calendarNextMonth);
-const ariaToday = i18n(I18nKey.calendarBackToday);
+const dragHint = t[I18nKey.calendarDragHint];
+const clearLabel = t[I18nKey.calendarClearFilter];
+const ariaPrev = t[I18nKey.calendarPrevMonth];
+const ariaNext = t[I18nKey.calendarNextMonth];
+const ariaToday = t[I18nKey.calendarBackToday];
 ---
 
 <WidgetLayout
-	name={i18n(I18nKey.calendar)}
+	name={t[I18nKey.calendar]}
 	id="calendar"
 	class={className}
 	style={style}
+	lang={pageLang}
 >
 	<div class="calendar-container select-none relative">
 		<div class="flex justify-between items-center mb-2">

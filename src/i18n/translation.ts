@@ -99,10 +99,10 @@ export function getCurrentLang(): SiteConfig["lang"] {
 		if (fromPath) {
 			return fromPath;
 		}
-		const storedLang = localStorage.getItem("lang");
-		if (storedLang) {
-			return normalizeLang(storedLang);
-		}
+		// Paths without a locale prefix (e.g. `/`, `/posts/...`) follow the site default
+		// language. Avoid using `localStorage` here: it persists after visiting `/id/` etc.
+		// and would mismatch URL semantics for the unprefixed routes.
+		return siteConfig.lang;
 	}
 
 	return siteConfig.lang;
