@@ -58,9 +58,7 @@ function isLikelyStaticAssetPath(path: string): boolean {
 		".eot",
 	];
 
-	return staticExtensions.some((ext: string) =>
-		lowerFilename.endsWith(ext),
-	);
+	return staticExtensions.some((ext: string) => lowerFilename.endsWith(ext));
 }
 
 export function getPostUrlBySlug(slug: string): string {

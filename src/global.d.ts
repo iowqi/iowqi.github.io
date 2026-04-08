@@ -6,7 +6,11 @@ declare global {
 		swup: AstroIntegration & {
 			hooks?: { on: (name: string, handler: () => void) => void };
 		};
-		__allPostMetaCache?: Array<{ id: string; title: string; published: string }>;
+		__allPostMetaCache?: Array<{
+			id: string;
+			title: string;
+			published: string;
+		}>;
 		__homeDateFilterRange?: { start: string; end: string } | null;
 		__calendarSwupHooked?: boolean;
 		pagefind: {
