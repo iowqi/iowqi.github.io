@@ -20,11 +20,11 @@ lang: 'zh_CN'
 
 网上翻车案例看多了——热风枪吹裂屏、加热台温度没控好直接送走面板——既心疼钱，家里也没有专业设备。权衡之后，我选了相对温和的一招：**530 电子清洁剂**（常见电路板除尘、溶胶用，挥发快）配合 **PET 塑料撬片**，慢慢渗胶、划胶，硬是靠耐心把屏幕安全卸下来了。(๑•̀ㅂ•́)و✧（我这里是亮着屏幕拆的，以便实时观察屏幕状态）。
 
-![](https://cdn.jsdelivr.net/gh/iowqi/iowqi.github.io/src/content/img/IMG20221114191722.jpg)
+![](https://cdn.jsdelivr.net/gh/iowqi/iowqi.github.io/src/content/posts/img/IMG20221114191722.jpg)
 
 **底座（键盘部分）** 的盖板用同一套路就好拆多了，比屏幕省心一大截。拆开一看，底座里的电池似乎早就被前任机主动过手脚——算是省了一道工序。
 
-![](https://cdn.jsdelivr.net/gh/iowqi/iowqi.github.io/src/content/img/IMG20221115211542.jpg)
+![](https://cdn.jsdelivr.net/gh/iowqi/iowqi.github.io/src/content/posts/img/IMG20221115211542.jpg)
 
 主板拆下后，电池底部同样是胶+卡位。继续用清洁剂软化胶层，配合铲刀把旧电池清干净，新电池用 **3M 红膜透明双面胶** 固定回去即可，贴平、压实，别留气泡。🔧
 
@@ -45,17 +45,17 @@ lang: 'zh_CN'
 - **主板** 贴高温胶带做绝缘，避免铜箔和焊点短路，背面贴石墨烯铜箔辅助均热。  
 - **均热管** 一面涂硅脂贴在 C 壳上，边缘用少量万能胶点涂定位即可，不必糊满。
 
-![](https://cdn.jsdelivr.net/gh/iowqi/iowqi.github.io/src/content/img/IMG_20250703_132629.jpg)
+![](https://cdn.jsdelivr.net/gh/iowqi/iowqi.github.io/src/content/posts/img/IMG_20250703_132629.jpg)
 
 风扇外壳需要 **稍微打磨** 才能卡进预留空间。出风口位置用胶带先把鳍片固定住，再用硅脂 + 胶把鳍片、风扇和均热管连成一条导热链路。
 
-![](https://cdn.jsdelivr.net/gh/iowqi/iowqi.github.io/src/content/img/IMG_20250703_132641.jpg)
+![](https://cdn.jsdelivr.net/gh/iowqi/iowqi.github.io/src/content/posts/img/IMG_20250703_132641.jpg)
 
 屏幕装回时用的是小厂屏框胶（和原厂比是下位替代，但够用）。胶条贴好后 **用平板 + 重物均匀压一段时间**，让胶充分贴合。
 
 另外我手里还有一台 **主板报废、但屏幕触控正常、C 壳更新** 的平板上半部，把零件拆过来做了替换，算是「尸体机再利用」。(ﾉ´ヮ`)ﾉ*:･ﾟ✧
 
-![](https://cdn.jsdelivr.net/gh/iowqi/iowqi.github.io/src/content/img/IMG_20250703_144014.jpg)
+![](https://cdn.jsdelivr.net/gh/iowqi/iowqi.github.io/src/content/posts/img/IMG_20250703_144014.jpg)
 
 ---
 
