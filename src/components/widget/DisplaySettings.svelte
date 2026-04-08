@@ -6,9 +6,9 @@ import {
 	getDefaultHue,
 	getHue,
 	getPostLayoutMode,
+	type PostLayoutMode,
 	setHue,
 	setPostLayoutMode,
-	type PostLayoutMode,
 } from "@utils/setting-utils";
 
 let hue = getHue();
