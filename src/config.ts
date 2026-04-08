@@ -50,7 +50,7 @@ export const siteConfig: SiteConfig = {
 			spring: 0.0065, // Spring force; smaller = slower return
 			damping: 0.94, // Velocity damping; closer to 1 = more floaty
 			targetDecay: 0.985, // Target decays to 0 when scrolling stops
-			gradientMultiplier: 1.1, // Gradient layer movement ratio vs banner
+			gradientMultiplier: 1.1, // Unused: overlays move with the parallax layer only (avoids seams when scrolling)
 		},
 		credit: {
 			enable: false, // Display the credit text of the banner image

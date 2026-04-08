@@ -1,4 +1,8 @@
 .custom-md {
+    /* Let grid/flex ancestors shrink this column; avoid page-wide horizontal overflow from long URLs/tables/pre */
+    @apply min-w-0 max-w-full;
+    overflow-wrap: break-word;
+
     h1 {
         @apply text-3xl;
     }

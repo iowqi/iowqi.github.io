@@ -13,6 +13,7 @@ import {
 	BANNER_HEIGHT_EXTEND,
 	MAIN_PANEL_OVERLAPS_BANNER_HEIGHT,
 } from "../constants/constants";
+import { isHomePath } from "../utils/url-utils";
 import Layout from "./Layout.astro";
 
 interface Props {
@@ -52,7 +53,6 @@ const bannerParallaxConfig = {
 	spring: siteConfig.banner.parallax?.spring ?? 0.08,
 	damping: siteConfig.banner.parallax?.damping ?? 0.82,
 	targetDecay: siteConfig.banner.parallax?.targetDecay ?? 0.92,
-	gradientMultiplier: siteConfig.banner.parallax?.gradientMultiplier ?? 1.2,
 };
 
 const welcomeTextContent = siteConfig.banner.welcomeText?.content;
@@ -85,6 +85,8 @@ const bannerWelcomeConfig = {
 	waveAmplitudePx: siteConfig.banner.welcomeText?.waveAmplitudePx ?? 16.8,
 	waveRotateDeg: siteConfig.banner.welcomeText?.waveRotateDeg ?? 5.2,
 };
+
+const showBannerWelcomeOnLoad = isHomePath(Astro.url.pathname);
 ---
 
 <Layout
@@ -148,8 +150,17 @@ const bannerWelcomeConfig = {
                     />
                     {bannerWelcomeConfig.enable && (
                         <div
-                            class="pointer-events-none absolute inset-0 z-20 flex items-center justify-center overflow-visible px-4"
+                            id="banner-welcome-layer"
+                            class:list={[
+                                "pointer-events-none absolute inset-0 z-20 flex items-center justify-center overflow-visible px-4 transition-opacity duration-200 ease-out motion-reduce:transition-none",
+                                showBannerWelcomeOnLoad
+                                    ? "opacity-100"
+                                    : "opacity-0",
+                            ]}
                             style={`padding-top:${bannerWelcomeConfig.containerPaddingYRem}rem;padding-bottom:${bannerWelcomeConfig.containerPaddingYRem}rem;`}
+                            aria-hidden={
+                                showBannerWelcomeOnLoad ? "false" : "true"
+                            }
                         >
                             <h1
                                 id="banner-welcome-text"
@@ -192,7 +203,7 @@ const bannerWelcomeConfig = {
         >
             <div
                 id="main-grid"
-                class="transition duration-700 w-full left-0 right-0 grid grid-cols-[17.5rem_auto] grid-rows-[auto_1fr_auto] lg:grid-rows-[auto]
+                class="transition duration-700 w-full left-0 right-0 grid grid-cols-[17.5rem_minmax(0,1fr)] grid-rows-[auto_1fr_auto] lg:grid-rows-[auto]
     mx-auto gap-4 px-0 md:px-4"
             >
                 <!-- Banner image credit -->
@@ -241,9 +252,9 @@ const bannerWelcomeConfig = {
 
                 <main
                     id="swup-container"
-                    class="transition-swup-fade col-span-2 lg:col-span-1 overflow-visible"
+                    class="transition-swup-fade col-span-2 lg:col-span-1 min-w-0 overflow-visible"
                 >
-                    <div id="content-wrapper" class="onload-animation">
+                    <div id="content-wrapper" class="onload-animation min-w-0">
                         <!-- the overflow-hidden here prevent long text break the layout-->
                         <!-- make id different from windows.swup global property -->
                         <slot />
@@ -313,12 +324,8 @@ const bannerWelcomeConfig = {
                 const parallaxLayer = document.querySelector(
                     "#banner-parallax-layer",
                 );
-                const gradientEls = Array.from(
-                    document.querySelectorAll("[data-banner-gradient]"),
-                );
 
-                if (!banner || !parallaxLayer || gradientEls.length === 0)
-                    return;
+                if (!banner || !parallaxLayer) return;
 
                 let current = 0;
                 let velocity = 0;
@@ -336,19 +343,15 @@ const bannerWelcomeConfig = {
                 const damping = Number(bannerParallaxConfig.damping) || 0.82;
                 const targetDecay =
                     Number(bannerParallaxConfig.targetDecay) || 0.92;
-                const gradientMultiplier =
-                    Number(bannerParallaxConfig.gradientMultiplier) || 1.2;
 
                 const clamp = (value, min, max) =>
                     Math.max(min, Math.min(max, value));
 
                 const render = (y) => {
                     parallaxLayer.style.transform = `translate3d(0, ${y}px, 0)`;
-                    banner.style.transform = "translate3d(0, 0, 0)";
-                    const gradientExtraOffset = y * (gradientMultiplier - 1);
-                    for (const el of gradientEls) {
-                        el.style.transform = `translate3d(0, ${gradientExtraOffset}px, 0)`;
-                    }
+                    // Keep Layout.astro translate-y on #banner for object-position framing; do not override.
+                    // Gradient overlays move with this layer only; a separate multiplier caused visible seams
+                    // vs the clipped image and --page-bg during fast smooth-scroll / spring settle.
                 };
 
                 const animate = () => {
@@ -420,21 +423,50 @@ const bannerWelcomeConfig = {
         })();
     </script>
 
-    <script is:inline>
-        (() => {
-            const stateKey = "__bannerWelcomeTypeState";
-            const existingState = window[stateKey];
-            if (existingState?.initialized) {
-                existingState.bindFromDom();
-                document.addEventListener(
-                    "astro:page-load",
-                    existingState.bindFromDom,
-                );
-                return;
-            }
+    <script>
+        import { isHomePath } from "../utils/url-utils";
 
-            const state = {
-                initialized: true,
+        const stateKey = "__bannerWelcomeTypeState";
+        const WELCOME_LAYER_ID = "banner-welcome-layer";
+
+        type BannerWelcomeState = {
+            domListenersAttached: boolean;
+            swupHookAttached: boolean;
+            swupEnableListenerAttached: boolean;
+            lastPathHome: boolean;
+            textEl: HTMLElement | null;
+            texts: string[];
+            typingSpeed: number;
+            deletingSpeed: number;
+            holdAfterTypedMs: number;
+            holdAfterDeletedMs: number;
+            cursorVisible: boolean;
+            textIndex: number;
+            charIndex: number;
+            isDeleting: boolean;
+            typeTimer: number | null;
+            pauseTimer: number | null;
+            cursorTimer: number | null;
+            bindFromDom: () => void;
+            render: () => void;
+            step: () => void;
+            start: () => void;
+            clearTimers: () => void;
+            syncWelcomeFromRoute: () => void;
+            onVisitStart: (visit: { to: { url: string } }) => void;
+        };
+
+        const w = window as unknown as Record<
+            string,
+            BannerWelcomeState | undefined
+        >;
+
+        function createDefaultState(): BannerWelcomeState {
+            return {
+                domListenersAttached: false,
+                swupHookAttached: false,
+                swupEnableListenerAttached: false,
+                lastPathHome: isHomePath(window.location.pathname),
                 textEl: null,
                 texts: ["Welcome"],
                 typingSpeed: 120,
@@ -453,192 +485,281 @@ const bannerWelcomeConfig = {
                 step: () => {},
                 start: () => {},
                 clearTimers: () => {},
+                syncWelcomeFromRoute: () => {},
+                onVisitStart: () => {},
             };
-            window[stateKey] = state;
+        }
 
-            const clearTimers = () => {
-                if (state.typeTimer) {
-                    window.clearTimeout(state.typeTimer);
-                    state.typeTimer = null;
-                }
-                if (state.pauseTimer) {
-                    window.clearTimeout(state.pauseTimer);
-                    state.pauseTimer = null;
-                }
-                if (state.cursorTimer) {
-                    window.clearInterval(state.cursorTimer);
-                    state.cursorTimer = null;
-                }
-            };
-            state.clearTimers = clearTimers;
+        if (!w[stateKey]) {
+            w[stateKey] = createDefaultState();
+        }
+        const state = w[stateKey]!;
 
-            const escapeHtml = (value) =>
-                value
-                    .replace(/&/g, "&amp;")
-                    .replace(/</g, "&lt;")
-                    .replace(/>/g, "&gt;")
-                    .replace(/\"/g, "&quot;")
-                    .replace(/'/g, "&#039;");
+        function applyWelcomeLayerVisible(home: boolean) {
+            const layer = document.getElementById(WELCOME_LAYER_ID);
+            if (!layer) return;
+            if (home) {
+                layer.classList.remove("opacity-0");
+                layer.classList.add("opacity-100");
+                layer.setAttribute("aria-hidden", "false");
+            } else {
+                layer.classList.remove("opacity-100");
+                layer.classList.add("opacity-0");
+                layer.setAttribute("aria-hidden", "true");
+            }
+        }
 
-            const renderWaveText = (el, typed, withCursor) => {
-                const waveDurationAttr = Number(
-                    el.getAttribute("data-wave-duration-ms"),
-                );
-                const waveDurationMs =
-                    Number.isFinite(waveDurationAttr) && waveDurationAttr > 0
-                        ? waveDurationAttr
-                        : 2600;
-                const nowMs = Date.now();
+        const clearTimers = () => {
+            if (state.typeTimer) {
+                window.clearTimeout(state.typeTimer);
+                state.typeTimer = null;
+            }
+            if (state.pauseTimer) {
+                window.clearTimeout(state.pauseTimer);
+                state.pauseTimer = null;
+            }
+            if (state.cursorTimer) {
+                window.clearInterval(state.cursorTimer);
+                state.cursorTimer = null;
+            }
+        };
 
-                const chars = [...typed]
-                    .map((char, i) => {
-                        const safeChar =
-                            char === " " ? "&nbsp;" : escapeHtml(char);
-                        const delayMs = -((nowMs + i * 90) % waveDurationMs);
-                        return `<span class="banner-welcome-wave-char" style="--wave-index:${i};animation-delay:${delayMs}ms">${safeChar}</span>`;
-                    })
-                    .join("");
+        const escapeHtml = (value: string) =>
+            value
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
 
-                const cursor = withCursor
-                    ? `<span class="banner-welcome-caret">_</span>`
-                    : "";
-                el.innerHTML = chars + cursor;
-            };
+        const renderWaveText = (
+            el: HTMLElement,
+            typed: string,
+            withCursor: boolean,
+        ) => {
+            const waveDurationAttr = Number(
+                el.getAttribute("data-wave-duration-ms"),
+            );
+            const waveDurationMs =
+                Number.isFinite(waveDurationAttr) && waveDurationAttr > 0
+                    ? waveDurationAttr
+                    : 2600;
+            const nowMs = Date.now();
 
-            const parseTexts = (textEl) => {
-                const raw = textEl.getAttribute("data-full-texts");
-                if (!raw) return ["Welcome"];
+            const chars = [...typed]
+                .map((char, i) => {
+                    const safeChar = char === " " ? "&nbsp;" : escapeHtml(char);
+                    const delayMs = -((nowMs + i * 90) % waveDurationMs);
+                    return `<span class="banner-welcome-wave-char" style="--wave-index:${i};animation-delay:${delayMs}ms">${safeChar}</span>`;
+                })
+                .join("");
 
-                try {
-                    const parsed = JSON.parse(raw);
-                    if (!Array.isArray(parsed)) return ["Welcome"];
+            const cursor = withCursor
+                ? `<span class="banner-welcome-caret">_</span>`
+                : "";
+            el.innerHTML = chars + cursor;
+        };
 
-                    const texts = parsed
-                        .filter((item) => typeof item === "string")
-                        .map((item) => item.trim())
-                        .filter((item) => item.length > 0);
+        const parseTexts = (textEl: HTMLElement) => {
+            const raw = textEl.getAttribute("data-full-texts");
+            if (!raw) return ["Welcome"];
 
-                    return texts.length > 0 ? texts : ["Welcome"];
-                } catch {
-                    return ["Welcome"];
-                }
-            };
+            try {
+                const parsed = JSON.parse(raw);
+                if (!Array.isArray(parsed)) return ["Welcome"];
 
-            const bindFromDom = () => {
-                const textEl = document.getElementById("banner-welcome-text");
-                if (!textEl) return;
+                const texts = parsed
+                    .filter((item: unknown) => typeof item === "string")
+                    .map((item: string) => item.trim())
+                    .filter((item: string) => item.length > 0);
 
-                const texts = parseTexts(textEl);
-                const typingSpeedAttr = Number(
-                    textEl.getAttribute("data-typing-speed"),
-                );
-                const typingSpeed =
-                    Number.isFinite(typingSpeedAttr) && typingSpeedAttr > 0
-                        ? typingSpeedAttr
-                        : 120;
-                const deletingSpeed = Math.max(
-                    45,
-                    Math.floor(typingSpeed * 0.7),
-                );
-                const holdAfterTypedAttr = Number(
-                    textEl.getAttribute("data-hold-after-typed-ms"),
-                );
-                const holdAfterTypedMs =
-                    Number.isFinite(holdAfterTypedAttr) &&
-                    holdAfterTypedAttr >= 0
-                        ? holdAfterTypedAttr
-                        : 1000;
-                const holdAfterDeletedAttr = Number(
-                    textEl.getAttribute("data-hold-after-deleted-ms"),
-                );
-                const holdAfterDeletedMs =
-                    Number.isFinite(holdAfterDeletedAttr) &&
-                    holdAfterDeletedAttr >= 0
-                        ? holdAfterDeletedAttr
-                        : 280;
+                return texts.length > 0 ? texts : ["Welcome"];
+            } catch {
+                return ["Welcome"];
+            }
+        };
 
+        const bindFromDom = () => {
+            const textEl = document.getElementById("banner-welcome-text");
+            if (!textEl) return;
+
+            const home = isHomePath(window.location.pathname);
+            if (!home) {
+                clearTimers();
+                applyWelcomeLayerVisible(false);
+                textEl.classList.add("opacity-0");
                 state.textEl = textEl;
-                state.texts = texts.length > 0 ? texts : ["Welcome"];
-                state.typingSpeed = typingSpeed;
-                state.deletingSpeed = deletingSpeed;
-                state.holdAfterTypedMs = holdAfterTypedMs;
-                state.holdAfterDeletedMs = holdAfterDeletedMs;
-                state.textIndex = state.textIndex % state.texts.length;
+                return;
+            }
 
-                textEl.classList.remove("opacity-0");
-                state.render();
-            };
-            state.bindFromDom = bindFromDom;
+            applyWelcomeLayerVisible(true);
 
-            const render = () => {
-                if (!state.textEl) return;
-                const currentText = state.texts[state.textIndex] ?? "";
-                const typed = currentText.slice(0, state.charIndex);
-                renderWaveText(state.textEl, typed, state.cursorVisible);
-            };
-            state.render = render;
+            const texts = parseTexts(textEl);
+            const typingSpeedAttr = Number(
+                textEl.getAttribute("data-typing-speed"),
+            );
+            const typingSpeed =
+                Number.isFinite(typingSpeedAttr) && typingSpeedAttr > 0
+                    ? typingSpeedAttr
+                    : 120;
+            const deletingSpeed = Math.max(45, Math.floor(typingSpeed * 0.7));
+            const holdAfterTypedAttr = Number(
+                textEl.getAttribute("data-hold-after-typed-ms"),
+            );
+            const holdAfterTypedMs =
+                Number.isFinite(holdAfterTypedAttr) && holdAfterTypedAttr >= 0
+                    ? holdAfterTypedAttr
+                    : 1000;
+            const holdAfterDeletedAttr = Number(
+                textEl.getAttribute("data-hold-after-deleted-ms"),
+            );
+            const holdAfterDeletedMs =
+                Number.isFinite(holdAfterDeletedAttr) &&
+                holdAfterDeletedAttr >= 0
+                    ? holdAfterDeletedAttr
+                    : 280;
 
-            const step = () => {
-                const currentText = state.texts[state.textIndex] ?? "";
+            state.textEl = textEl;
+            state.texts = texts.length > 0 ? texts : ["Welcome"];
+            state.typingSpeed = typingSpeed;
+            state.deletingSpeed = deletingSpeed;
+            state.holdAfterTypedMs = holdAfterTypedMs;
+            state.holdAfterDeletedMs = holdAfterDeletedMs;
+            state.textIndex = state.textIndex % state.texts.length;
 
-                if (!state.isDeleting) {
-                    if (state.charIndex < currentText.length) {
-                        state.charIndex += 1;
-                        render();
-                        state.typeTimer = window.setTimeout(
-                            step,
-                            state.typingSpeed,
-                        );
-                        return;
-                    }
+            textEl.classList.remove("opacity-0");
+            state.render();
+        };
 
-                    state.pauseTimer = window.setTimeout(() => {
-                        state.isDeleting = true;
-                        step();
-                    }, state.holdAfterTypedMs);
-                    return;
-                }
+        const render = () => {
+            if (!state.textEl) return;
+            const currentText = state.texts[state.textIndex] ?? "";
+            const typed = currentText.slice(0, state.charIndex);
+            renderWaveText(state.textEl, typed, state.cursorVisible);
+        };
 
-                if (state.charIndex > 0) {
-                    state.charIndex -= 1;
+        const step = () => {
+            const currentText = state.texts[state.textIndex] ?? "";
+
+            if (!state.isDeleting) {
+                if (state.charIndex < currentText.length) {
+                    state.charIndex += 1;
                     render();
                     state.typeTimer = window.setTimeout(
                         step,
-                        state.deletingSpeed,
+                        state.typingSpeed,
                     );
                     return;
                 }
 
-                state.textIndex = (state.textIndex + 1) % state.texts.length;
-                state.isDeleting = false;
-                state.pauseTimer = window.setTimeout(
-                    step,
-                    state.holdAfterDeletedMs,
-                );
-            };
-            state.step = step;
+                state.pauseTimer = window.setTimeout(() => {
+                    state.isDeleting = true;
+                    step();
+                }, state.holdAfterTypedMs);
+                return;
+            }
 
-            const start = () => {
-                clearTimers();
-                state.cursorTimer = window.setInterval(() => {
-                    state.cursorVisible = !state.cursorVisible;
-                    render();
-                }, 420);
-
+            if (state.charIndex > 0) {
+                state.charIndex -= 1;
                 render();
-                state.typeTimer = window.setTimeout(step, state.typingSpeed);
-            };
-            state.start = start;
+                state.typeTimer = window.setTimeout(step, state.deletingSpeed);
+                return;
+            }
+
+            state.textIndex = (state.textIndex + 1) % state.texts.length;
+            state.isDeleting = false;
+            state.pauseTimer = window.setTimeout(
+                step,
+                state.holdAfterDeletedMs,
+            );
+        };
+
+        const start = () => {
+            clearTimers();
+            state.cursorTimer = window.setInterval(() => {
+                state.cursorVisible = !state.cursorVisible;
+                render();
+            }, 420);
+
+            render();
+            state.typeTimer = window.setTimeout(step, state.typingSpeed);
+        };
+
+        const syncWelcomeFromRoute = () => {
+            const home = isHomePath(window.location.pathname);
+            const wasHome = state.lastPathHome;
+            state.lastPathHome = home;
+
+            bindFromDom();
+
+            if (home && state.textEl) {
+                if (!wasHome) {
+                    state.textIndex = 0;
+                    state.charIndex = 0;
+                    state.isDeleting = false;
+                    state.cursorVisible = true;
+                }
+                start();
+            } else {
+                clearTimers();
+            }
+        };
+
+        const onVisitStart = (visit: { to: { url: string } }) => {
+            const fromHome = isHomePath(window.location.pathname);
+            const toPath = new URL(visit.to.url, window.location.origin)
+                .pathname;
+            const toHome = isHomePath(toPath);
+            if (fromHome && !toHome) {
+                applyWelcomeLayerVisible(false);
+                clearTimers();
+                const textEl = document.getElementById("banner-welcome-text");
+                if (textEl) textEl.classList.add("opacity-0");
+            }
+        };
+
+        state.bindFromDom = bindFromDom;
+        state.render = render;
+        state.step = step;
+        state.start = start;
+        state.clearTimers = clearTimers;
+        state.syncWelcomeFromRoute = syncWelcomeFromRoute;
+        state.onVisitStart = onVisitStart;
+
+        if (!state.domListenersAttached) {
+            state.domListenersAttached = true;
 
             window.addEventListener("load", () => {
                 window.setTimeout(() => {
-                    bindFromDom();
-                    start();
+                    w[stateKey]!.syncWelcomeFromRoute();
                 }, 120);
             });
 
-            document.addEventListener("astro:page-load", bindFromDom);
-        })();
+            document.addEventListener("astro:page-load", () => {
+                w[stateKey]!.syncWelcomeFromRoute();
+            });
+        }
+
+        if (!state.swupHookAttached) {
+            const attach = () => {
+                if (!window.swup?.hooks || state.swupHookAttached) return;
+                state.swupHookAttached = true;
+                window.swup.hooks.on(
+                    "visit:start",
+                    (visit: { to: { url: string } }) => {
+                        w[stateKey]!.onVisitStart(visit);
+                    },
+                );
+            };
+            if (window.swup?.hooks) {
+                attach();
+            } else if (!state.swupEnableListenerAttached) {
+                state.swupEnableListenerAttached = true;
+                document.addEventListener("swup:enable", () => attach(), {
+                    once: true,
+                });
+            }
+        }
     </script>
 
     <script is:inline>
