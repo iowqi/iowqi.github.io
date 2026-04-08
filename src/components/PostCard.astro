@@ -196,7 +196,7 @@ const { remarkPluginFrontmatter } = await entry.render();
 	}
 
 	html[data-post-layout="grid"] .post-card .post-card-cover-link {
-		@apply md:static md:w-full md:mx-0 md:mt-0 md:mb-0 md:max-h-[280px] md:rounded-t-[var(--radius-large)] md:rounded-b-none;
+		@apply md:relative md:inset-auto md:w-full md:mx-0 md:mt-0 md:mb-0 md:max-h-[280px] md:rounded-t-[var(--radius-large)] md:rounded-b-none;
 	}
 
 	html[data-post-layout="grid"] .post-card .post-card-enter-btn {
