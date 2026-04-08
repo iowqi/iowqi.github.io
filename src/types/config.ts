@@ -28,6 +28,8 @@ export type SiteConfig = {
 			enable: boolean;
 			content: string | string[];
 			typingSpeed?: number;
+			/** Extra pause (ms) after typing or deleting a line break (`\\n`) */
+			lineBreakPauseMs?: number;
 			holdAfterTypedMs?: number;
 			holdAfterDeletedMs?: number;
 			fontFamily?: string;

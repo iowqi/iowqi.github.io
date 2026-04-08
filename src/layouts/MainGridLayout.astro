@@ -69,6 +69,8 @@ const bannerWelcomeConfig = {
 	enable: siteConfig.banner.welcomeText?.enable ?? true,
 	contents: welcomeTextList.length > 0 ? welcomeTextList : ["Welcome"],
 	typingSpeed: siteConfig.banner.welcomeText?.typingSpeed ?? 120,
+	lineBreakPauseMs:
+		siteConfig.banner.welcomeText?.lineBreakPauseMs ?? 520,
 	holdAfterTypedMs: siteConfig.banner.welcomeText?.holdAfterTypedMs ?? 1000,
 	holdAfterDeletedMs: siteConfig.banner.welcomeText?.holdAfterDeletedMs ?? 280,
 	fontFamily:
@@ -177,6 +179,9 @@ const resolvedPageLang = normalizeLang(
                                 data-typing-speed={
                                     bannerWelcomeConfig.typingSpeed
                                 }
+                                data-line-break-pause-ms={
+                                    bannerWelcomeConfig.lineBreakPauseMs
+                                }
                                 data-hold-after-typed-ms={
                                     bannerWelcomeConfig.holdAfterTypedMs
                                 }
@@ -186,9 +191,11 @@ const resolvedPageLang = normalizeLang(
                                 data-wave-duration-ms={
                                     bannerWelcomeConfig.waveDurationMs
                                 }
-                                aria-label={bannerWelcomeConfig.contents.join(
-                                    " / ",
-                                )}
+                                aria-label={bannerWelcomeConfig.contents
+                                    .map((line) =>
+                                        line.replace(/\r?\n+/g, " ").trim(),
+                                    )
+                                    .join(" / ")}
                             />
                         </div>
                     )}
@@ -446,6 +453,7 @@ const resolvedPageLang = normalizeLang(
             deletingSpeed: number;
             holdAfterTypedMs: number;
             holdAfterDeletedMs: number;
+            lineBreakPauseMs: number;
             cursorVisible: boolean;
             textIndex: number;
             charIndex: number;
@@ -479,6 +487,7 @@ const resolvedPageLang = normalizeLang(
                 deletingSpeed: 84,
                 holdAfterTypedMs: 1000,
                 holdAfterDeletedMs: 280,
+                lineBreakPauseMs: 520,
                 cursorVisible: true,
                 textIndex: 0,
                 charIndex: 0,
@@ -552,11 +561,17 @@ const resolvedPageLang = normalizeLang(
                     : 2600;
             const nowMs = Date.now();
 
+            let waveIndex = 0;
             const chars = [...typed]
-                .map((char, i) => {
+                .map((char) => {
+                    if (char === "\r") return "";
+                    if (char === "\n") return "<br />";
                     const safeChar = char === " " ? "&nbsp;" : escapeHtml(char);
-                    const delayMs = -((nowMs + i * 90) % waveDurationMs);
-                    return `<span class="banner-welcome-wave-char" style="--wave-index:${i};animation-delay:${delayMs}ms">${safeChar}</span>`;
+                    const delayMs =
+                        -((nowMs + waveIndex * 90) % waveDurationMs);
+                    const html = `<span class="banner-welcome-wave-char" style="--wave-index:${waveIndex};animation-delay:${delayMs}ms">${safeChar}</span>`;
+                    waveIndex += 1;
+                    return html;
                 })
                 .join("");
 
@@ -624,6 +639,13 @@ const resolvedPageLang = normalizeLang(
                 holdAfterDeletedAttr >= 0
                     ? holdAfterDeletedAttr
                     : 280;
+            const lineBreakPauseAttr = Number(
+                textEl.getAttribute("data-line-break-pause-ms"),
+            );
+            const lineBreakPauseMs =
+                Number.isFinite(lineBreakPauseAttr) && lineBreakPauseAttr >= 0
+                    ? lineBreakPauseAttr
+                    : 520;
 
             state.textEl = textEl;
             state.texts = texts.length > 0 ? texts : ["Welcome"];
@@ -631,6 +653,7 @@ const resolvedPageLang = normalizeLang(
             state.deletingSpeed = deletingSpeed;
             state.holdAfterTypedMs = holdAfterTypedMs;
             state.holdAfterDeletedMs = holdAfterDeletedMs;
+            state.lineBreakPauseMs = lineBreakPauseMs;
             state.textIndex = state.textIndex % state.texts.length;
 
             textEl.classList.remove("opacity-0");
@@ -651,10 +674,12 @@ const resolvedPageLang = normalizeLang(
                 if (state.charIndex < currentText.length) {
                     state.charIndex += 1;
                     render();
-                    state.typeTimer = window.setTimeout(
-                        step,
-                        state.typingSpeed,
-                    );
+                    const justTyped = currentText[state.charIndex - 1];
+                    const delay =
+                        justTyped === "\n"
+                            ? state.lineBreakPauseMs
+                            : state.typingSpeed;
+                    state.typeTimer = window.setTimeout(step, delay);
                     return;
                 }
 
@@ -668,7 +693,12 @@ const resolvedPageLang = normalizeLang(
             if (state.charIndex > 0) {
                 state.charIndex -= 1;
                 render();
-                state.typeTimer = window.setTimeout(step, state.deletingSpeed);
+                const removedChar = currentText[state.charIndex];
+                const delay =
+                    removedChar === "\n"
+                        ? state.lineBreakPauseMs
+                        : state.deletingSpeed;
+                state.typeTimer = window.setTimeout(step, delay);
                 return;
             }
 
