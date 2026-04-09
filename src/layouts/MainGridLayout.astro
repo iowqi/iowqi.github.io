@@ -69,8 +69,7 @@ const bannerWelcomeConfig = {
 	enable: siteConfig.banner.welcomeText?.enable ?? true,
 	contents: welcomeTextList.length > 0 ? welcomeTextList : ["Welcome"],
 	typingSpeed: siteConfig.banner.welcomeText?.typingSpeed ?? 120,
-	lineBreakPauseMs:
-		siteConfig.banner.welcomeText?.lineBreakPauseMs ?? 520,
+	lineBreakPauseMs: siteConfig.banner.welcomeText?.lineBreakPauseMs ?? 520,
 	holdAfterTypedMs: siteConfig.banner.welcomeText?.holdAfterTypedMs ?? 1000,
 	holdAfterDeletedMs: siteConfig.banner.welcomeText?.holdAfterDeletedMs ?? 280,
 	fontFamily:
