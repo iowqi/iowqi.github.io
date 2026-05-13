@@ -3,7 +3,7 @@ title: 我的第一台笔记本 Surface Book
 published: 2022-12-01
 updated: 2025-07-03
 description: '一次surface book的维修和散热改装记录'
-image: 'https://cdn.jsdelivr.net/gh/iowqi/iowqi.github.io/src/content/img/IMG20221119013816.jpg'
+image: 'https://cdn.jsdelivr.net/gh/iowqi/iowqi.github.io/src/content/posts/img/IMG20221119013816.jpg'
 tags: [维修]
 category: 生活记录
 draft: false 
@@ -20,7 +20,7 @@ lang: 'zh_CN'
 
 网上翻车案例看多了——热风枪吹裂屏、加热台温度没控好直接送走面板——既心疼钱，家里也没有专业设备。权衡之后，我选了相对温和的一招：**530 电子清洁剂**（常见电路板除尘、溶胶用，挥发快）配合 **PET 塑料撬片**，慢慢渗胶、划胶，硬是靠耐心把屏幕安全卸下来了。(๑•̀ㅂ•́)و✧（我这里是亮着屏幕拆的，以便实时观察屏幕状态）。
 
-![](https://cdn.jsdelivr.net/gh/iowqi/iowqi.github.io/src/content/posts/img/IMG20221114191722.jpg)
+![](https://cdn.jsdelivr.net/gh/iowqi/iowqi.github.io/src/content/posts/img/IMG20221119013816.jpg)
 
 **底座（键盘部分）** 的盖板用同一套路就好拆多了，比屏幕省心一大截。拆开一看，底座里的电池似乎早就被前任机主动过手脚——算是省了一道工序。
 
